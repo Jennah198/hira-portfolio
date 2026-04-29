@@ -97,7 +97,7 @@ export default function ContactPage() {
                     </CardContent>
                   </Card>
 
-                  <div>
+                  {/* <div>
                     <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
                     <div className="flex items-center gap-4">
                       <a
@@ -122,10 +122,10 @@ export default function ContactPage() {
                         <Send className="text-accent-foreground" size={24} />
                       </a>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
-                <Card className="mt-8 border-border bg-muted/30">
+                {/* <Card className="mt-8 border-border bg-muted/30">
                   <CardContent className="p-6">
                     <h3 className="font-semibold text-card-foreground mb-3">Office Hours</h3>
                     <div className="space-y-2 text-sm">
@@ -143,7 +143,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </Card> */}
               </div>
 
               <div>
@@ -208,7 +208,7 @@ export default function ContactPage() {
                   </CardContent>
                 </Card>
 
-                <div className="mt-8">
+                {/* <div className="mt-8">
                   <Card className="border-border overflow-hidden">
                     <div className="relative h-64 bg-muted">
                       <img
@@ -218,7 +218,7 @@ export default function ContactPage() {
                       />
                     </div>
                   </Card>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
