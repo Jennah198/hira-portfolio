@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { Heart, BookOpen, TreePine, Users, Lightbulb, HandHeart } from "lucide-react"
+import { Heart, BookOpen, TreePine, Users, Lightbulb, HandHeart, GraduationCap, Palette } from "lucide-react"
 import Image from "next/image"
 
 const activities = [
@@ -10,42 +10,42 @@ const activities = [
     title: "Charity & Community Service",
     description:
       "Supporting those in need through fundraising, donations, and community outreach programs that make a real difference.",
-    image: "/charity-community-service-volunteers.jpg",
+    image: "/images/charity.png",
   },
   {
-    icon: TreePine,
-    title: "Tree Planting Initiatives",
+    icon: GraduationCap,
+    title: "Graduation Ceremony",
     description:
-      "Environmental stewardship through organized tree planting campaigns to preserve nature and combat climate change.",
-    image: "/tree-planting-environmental-conservation.jpg",
+      "Celebrate academic excellence and achievements at our annual graduation ceremony, honoring students who have successfully completed their programs.",
+    image: "/images/graduation.png",
   },
   {
     icon: BookOpen,
     title: "Educational Study Circles",
     description:
       "Weekly study groups exploring Islamic knowledge, academic excellence, and personal development through collaborative learning.",
-    image: "/students-studying-books-islamic-learning.jpg",
+    image: "/images/educationalStudies.png",
   },
   {
     icon: Users,
     title: "Social Development Programs",
     description:
       "Building brotherhood and sisterhood through mentorship, leadership training, and community-building activities.",
-    image: "/diverse-students-community-gathering.jpg",
+    image: "/images/socialGathering.png",
   },
   {
     icon: Lightbulb,
     title: "Leadership Workshops",
     description:
       "Empowering students with skills in public speaking, project management, and ethical leadership rooted in Islamic values.",
-    image: "/leadership-workshop-presentation.jpg",
+    image: "/images/religiousstudies.png",
   },
   {
-    icon: HandHeart,
-    title: "Interfaith Dialogue",
+    icon: Palette,
+    title: "Annual Exhibition",
     description:
-      "Promoting understanding and cooperation through respectful conversations with people of all faiths and backgrounds.",
-    image: "/interfaith-dialogue-peaceful-discussion.jpg",
+      "Experience the creativity and innovation of our students at the Annual Exhibition. Featuring artwork, design projects, research posters, and interactive demonstrations across multiple disciplines.",
+    image: "/images/mechExhibition.png",
   },
 ]
 

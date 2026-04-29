@@ -66,7 +66,7 @@ export function AboutSection() {
 
           <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
             <Image
-              src="/diverse-muslim-students-studying-together-with-boo.jpg"
+              src="/images/darkPostureLogo.png"
               alt="Students engaged in Islamic learning and study"
               fill
               className="object-cover"

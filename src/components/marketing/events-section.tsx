@@ -8,15 +8,15 @@ import Link from "next/link"
 
 export function EventsSection() {
   const graduationImages = [
-    "/graduation-ceremony-2023.jpg",
-    "/graduation-ceremony-2022.jpg",
-    "/graduation-ceremony-2021.jpg",
+    "/images/gradwithredgawn.png",
+    "/images/gradwithredgawn.png",
+    "/images/gradwithredgawn.png",
   ]
 
   const exhibitionImages = [
-    "/exhibition-showcase-2023.jpg",
-    "/exhibition-showcase-2022.jpg",
-    "/exhibition-showcase-2021.jpg",
+    "/images/mechExhibition.png",
+    "/images/mechExhibition.png",
+    "/images/mechExhibition.png",
   ]
 
   return (
@@ -67,10 +67,10 @@ export function EventsSection() {
                     and service to the community. Join us in recognizing their dedication to Islamic values and
                     scholarly pursuits as they embark on their next chapter.
                   </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                  {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                     <Calendar size={16} />
                     <span>Held annually in May</span>
-                  </div>
+                  </div> */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button asChild className="bg-accent hover:bg-accent/90">
                       <Link href="/events#graduation">Attend Next Event</Link>
@@ -100,10 +100,10 @@ export function EventsSection() {
                     that demonstrate how Islamic values inspire academic excellence and positive social impact. Explore
                     diverse exhibits spanning technology, arts, social sciences, and more.
                   </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                  {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                     <Calendar size={16} />
                     <span>Held annually in November</span>
-                  </div>
+                  </div> */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button asChild className="bg-accent hover:bg-accent/90">
                       <Link href="/events#exhibition">Attend Next Event</Link>
