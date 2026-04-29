@@ -69,7 +69,7 @@ export function ContactSection() {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Phone</h4>
-                      <p className="text-muted-foreground"> </p>
+                      <p className="text-muted-foreground">+2519 6452 1722</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -81,7 +81,7 @@ export function ContactSection() {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Email</h4>
-                      <p className="text-muted-foreground">info@hiramsa.org</p>
+                      <p className="text-muted-foreground">Advertamr@gmail.com</p>
                     </div>
                   </CardContent>
                 </Card>

@@ -77,7 +77,7 @@ export default function MembershipPage() {
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li className="flex items-start gap-2">
                         <span className="text-primary mt-1">•</span>
-                        <span>Current enrollment at the university</span>
+                        <span>Current enrollment at the school or university</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-primary mt-1">•</span>
@@ -159,7 +159,7 @@ export default function MembershipPage() {
                           value={formData.program}
                           onChange={handleChange}
                           required
-                          placeholder="e.g., Computer Science"
+                          placeholder="e.g., Computer Science, High School"
                         />
                       </div>
 
@@ -171,7 +171,7 @@ export default function MembershipPage() {
                           value={formData.year}
                           onChange={handleChange}
                           required
-                          placeholder="e.g., 2nd Year"
+                          placeholder="e.g., 2nd Year or grade 11"
                         />
                       </div>
 

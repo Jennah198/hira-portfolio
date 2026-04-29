@@ -104,7 +104,7 @@ export function Footer() {
               <div className="flex items-start gap-3 text-sm opacity-90">
                 <Mail size={16} className="mt-0.5 flex-shrink-0" />
                 <div>
-                  <div>info@hiramsa.org</div>
+                  <div>Advertamr@gmail.com</div>
                   <div className="text-xs opacity-75 mt-0.5">We reply within 24 hours</div>
                 </div>
               </div>

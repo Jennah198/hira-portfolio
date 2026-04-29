@@ -62,8 +62,8 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-card-foreground mb-1">Email</h3>
-                        <p className="text-sm text-muted-foreground">info@hiramsa.org</p>
-                        <p className="text-sm text-muted-foreground">president@hiramsa.org</p>
+                        <p className="text-sm text-muted-foreground">Advertamr@gmail.com</p>
+                        <p className="text-sm text-muted-foreground">neziraworku198@gmail.com</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -75,8 +75,8 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-card-foreground mb-1">Phone</h3>
-                        <p className="text-sm text-muted-foreground">+251 91 234 5678</p>
-                        <p className="text-sm text-muted-foreground">+251 92 345 6789</p>
+                        <p className="text-sm text-muted-foreground">+251 96 452 1722</p>
+                        <p className="text-sm text-muted-foreground">+251 90 000 4848</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -89,11 +89,9 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold text-card-foreground mb-1">Office Location</h3>
                         <p className="text-sm text-muted-foreground">
-                          Student Union Building, Room 205
-                          <br />
-                          University Campus
-                          <br />
-                          Addis Ababa, Ethiopia
+                        Lubaba Mosque
+                        <br />
+                        Ethiopia Addis Abeba
                         </p>
                       </div>
                     </CardContent>
@@ -110,14 +108,14 @@ export default function ContactPage() {
                         <Facebook className="text-accent-foreground" size={24} />
                       </a>
                       <a
-                        href="#"
+                        href="https://www.instagram.com/hira_muslim_students_page1/"
                         className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center hover:bg-accent/80 transition-colors"
                         aria-label="Instagram"
                       >
                         <Instagram className="text-accent-foreground" size={24} />
                       </a>
                       <a
-                        href="#"
+                        href="https://t.me/HiraMuslimstudent"
                         className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center hover:bg-accent/80 transition-colors"
                         aria-label="Telegram"
                       >

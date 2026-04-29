@@ -52,7 +52,7 @@ export default function EventsPage() {
                     <MapPin className="text-primary mt-1 flex-shrink-0" size={20} />
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Where</h4>
-                      <p className="text-sm text-muted-foreground">University Main Hall</p>
+                      <p className="text-sm text-muted-foreground">Different well known halls</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -60,7 +60,7 @@ export default function EventsPage() {
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Who Attends</h4>
                       <p className="text-sm text-muted-foreground">
-                        Graduates, families, faculty, and association members
+                        Graduates, families, scholars, and association members
                       </p>
                     </div>
                   </div>
@@ -71,7 +71,7 @@ export default function EventsPage() {
                 <Card className="border-border overflow-hidden">
                   <div className="relative h-64 bg-gradient-to-br from-accent to-accent/60">
                     <img
-                      src="/graduation-ceremony-students-celebrating.jpg"
+                      src="/images/gradwithredgawn.png"
                       alt="Graduation ceremony"
                       className="w-full h-full object-cover"
                     />
@@ -101,7 +101,7 @@ export default function EventsPage() {
               </div>
             </div>
 
-            <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {/* <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[2024, 2023, 2022, 2021].map((year) => (
                 <Card key={year} className="border-border overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative h-40 bg-muted">
@@ -117,7 +117,7 @@ export default function EventsPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -128,7 +128,7 @@ export default function EventsPage() {
                 <Card className="border-border overflow-hidden">
                   <div className="relative h-64 bg-gradient-to-br from-primary/20 to-primary/10">
                     <img
-                      src="/exhibition-booths-projects-showcase.jpg"
+                      src="/images/exhibitionStands.png"
                       alt="Annual exhibition"
                       className="w-full h-full object-cover"
                     />
@@ -172,14 +172,14 @@ export default function EventsPage() {
                     <Calendar className="text-primary mt-1 flex-shrink-0" size={20} />
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">When</h4>
-                      <p className="text-sm text-muted-foreground">Spring semester, typically in April</p>
+                      <p className="text-sm text-muted-foreground">Summer Break, typically in August</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin className="text-primary mt-1 flex-shrink-0" size={20} />
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Where</h4>
-                      <p className="text-sm text-muted-foreground">University Exhibition Center</p>
+                      <p className="text-sm text-muted-foreground">Awolia Hall</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -196,7 +196,7 @@ export default function EventsPage() {
               </div>
             </div>
 
-            <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {/* <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[2024, 2023, 2022, 2021].map((year) => (
                 <Card key={year} className="border-border overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative h-40 bg-muted">
@@ -212,7 +212,7 @@ export default function EventsPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -225,11 +225,11 @@ export default function EventsPage() {
                 <div className="text-muted-foreground">Graduates</div>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">150+</div>
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">15+</div>
                 <div className="text-muted-foreground">Projects Showcased</div>
               </div>
               <div>
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">12</div>
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">6+</div>
                 <div className="text-muted-foreground">Years of Excellence</div>
               </div>
             </div>
