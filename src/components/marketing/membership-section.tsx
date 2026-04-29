@@ -113,7 +113,7 @@ export function MembershipSection() {
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Members have the opportunity to lead projects, organize events, participate in charitable initiatives,
-                and represent Hira at university and community functions. We expect active participation, commitment to
+                and represent Hira at schools and community functions. We expect active participation, commitment to
                 our values, and contribution to our collective mission of knowledge and service.
               </p>
             </div>
@@ -132,7 +132,7 @@ export function MembershipSection() {
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="John Doe" {...field} />
+                          <Input placeholder="Abdulah" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -146,7 +146,7 @@ export function MembershipSection() {
                       <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="john.doe@university.edu" {...field} />
+                          <Input type="email" placeholder="Abdulah@gmail.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -160,7 +160,7 @@ export function MembershipSection() {
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
+                          <Input type="tel" placeholder="+2519 123 456" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -172,9 +172,9 @@ export function MembershipSection() {
                     name="university"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>University / Department</FormLabel>
+                        <FormLabel>University / School</FormLabel>
                         <FormControl>
-                          <Input placeholder="University Name or Department" {...field} />
+                          <Input placeholder="School Name or University Department" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -197,7 +197,7 @@ export function MembershipSection() {
                             <SelectItem value="education">Educational Programs</SelectItem>
                             <SelectItem value="charity">Charity & Community Service</SelectItem>
                             <SelectItem value="leadership">Leadership Development</SelectItem>
-                            <SelectItem value="social">Social & Cultural Events</SelectItem>
+                            <SelectItem value="social">Social & spiritual Events</SelectItem>
                             <SelectItem value="spiritual">Spiritual Growth</SelectItem>
                             <SelectItem value="environmental">Environmental Initiatives</SelectItem>
                           </SelectContent>

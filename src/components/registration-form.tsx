@@ -13,7 +13,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const registrationSchema = z.object({
   full_name: z.string().min(2, 'Name is required'),
-  email: z.string().email('Invalid email'),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
   phone: z.string().optional(),
   additional_info: z.string().optional(),
 })
@@ -67,7 +67,7 @@ export function RegistrationForm({ eventType, buttonText = 'Register Now' }: Reg
       </div>
 
       <div>
-        <Label htmlFor="email">Email *</Label>
+        <Label htmlFor="email">Email (Optional)</Label>
         <Input id="email" type="email" {...register('email')} />
         {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
       </div>

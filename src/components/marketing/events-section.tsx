@@ -5,17 +5,18 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Button } from "@/components/ui/button"
 import { Award, Calendar } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export function EventsSection() {
   const graduationImages = [
     "/images/gradwithredgawn.png",
-    "/images/gradwithredgawn.png",
-    "/images/gradwithredgawn.png",
+    "/images/certificates.png",
+    "/images/graduationPoster.png",
   ]
 
   const exhibitionImages = [
-    "/images/mechExhibition.png",
-    "/images/mechExhibition.png",
+    "/images/exhibitionStands.png",
+    "/images/swExhibition.png",
     "/images/mechExhibition.png",
   ]
 
@@ -41,9 +42,11 @@ export function EventsSection() {
                       {graduationImages.map((image, index) => (
                         <CarouselItem key={index}>
                           <div className="relative aspect-[4/3] bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
-                            <img
-                              src={`/.jpg?height=600&width=800&query=${encodeURIComponent(`graduation ceremony ${2023 - index}`)}`}
+                            <Image
+                              src={image}
                               alt={`Graduation Ceremony ${2023 - index}`}
+                              width={800}
+                              height={600}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -64,19 +67,14 @@ export function EventsSection() {
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     Our annual graduation ceremony celebrates the remarkable achievements of our graduating members.
                     This prestigious event honors students who have demonstrated excellence in academics, leadership,
-                    and service to the community. Join us in recognizing their dedication to Islamic values and
-                    scholarly pursuits as they embark on their next chapter.
+                    and service to the community. Join us in recognizing their dedication as they embark on their next chapter.
                   </p>
-                  {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-                    <Calendar size={16} />
-                    <span>Held annually in May</span>
-                  </div> */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button asChild className="bg-accent hover:bg-accent/90">
                       <Link href="/events#graduation">Attend Next Event</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link href="/membership">Register Now</Link>
+                      <Link href="/events/graduation/register">Register Now</Link>
                     </Button>
                   </div>
                 </div>
@@ -97,19 +95,15 @@ export function EventsSection() {
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     The Annual Exhibition showcases the creativity, innovation, and scholarly excellence of our student
                     community. This vibrant event features research projects, artistic works, and innovative solutions
-                    that demonstrate how Islamic values inspire academic excellence and positive social impact. Explore
-                    diverse exhibits spanning technology, arts, social sciences, and more.
+                    that demonstrate academic excellence and positive social impact. Explore diverse exhibits spanning 
+                    technology, arts, social sciences, and more.
                   </p>
-                  {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-                    <Calendar size={16} />
-                    <span>Held annually in November</span>
-                  </div> */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button asChild className="bg-accent hover:bg-accent/90">
                       <Link href="/events#exhibition">Attend Next Event</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link href="/membership">Register Now</Link>
+                      <Link href="/events/exhibition/register">Register Now</Link>
                     </Button>
                   </div>
                 </div>
@@ -120,9 +114,11 @@ export function EventsSection() {
                       {exhibitionImages.map((image, index) => (
                         <CarouselItem key={index}>
                           <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                            <img
-                              src={`/.jpg?height=600&width=800&query=${encodeURIComponent(`student exhibition showcase ${2023 - index}`)}`}
+                            <Image
+                              src={image}
                               alt={`Annual Exhibition ${2023 - index}`}
+                              width={800}
+                              height={600}
                               className="w-full h-full object-cover"
                             />
                           </div>

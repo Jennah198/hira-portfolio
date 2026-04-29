@@ -35,14 +35,14 @@ export function Footer() {
                   <Facebook size={18} />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.instagram.com/hira_muslim_students_page1/"
                   className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
                   aria-label="Instagram"
                 >
                   <Instagram size={18} />
                 </a>
                 <a
-                  href="#"
+                  href="https://t.me/HiraMuslimstudent"
                   className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
                   aria-label="Telegram"
                 >
@@ -97,7 +97,7 @@ export function Footer() {
               <div className="flex items-start gap-3 text-sm opacity-90">
                 <Phone size={16} className="mt-0.5 flex-shrink-0" />
                 <div>
-                  <div>+251 91 234 5678</div>
+                  <div>+2519 6452 1722</div>
                   <div className="text-xs opacity-75 mt-0.5">Mon-Fri, 2PM-6PM</div>
                 </div>
               </div>
@@ -111,9 +111,9 @@ export function Footer() {
               <div className="flex items-start gap-3 text-sm opacity-90">
                 <MapPin size={16} className="mt-0.5 flex-shrink-0" />
                 <div>
-                  Student Union Building
-                  <br />
-                  Room 205, University Campus
+                        Lubaba Mosque
+                        <br />
+                        Ethiopia Addis Abeba
                 </div>
               </div>
             </div>
