@@ -1,30 +1,199 @@
-# Hira Muslim Association website
+markdown
+# Hira Muslim Association Website
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/neziraworku198-gmailcoms-projects/v0-hira-muslim-association-website)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/qjhPY939KQ4)
+## 📋 Overview
 
-## Overview
+A modern, full-stack website for Hira Muslim Association, featuring event registration, membership management, and an admin dashboard. Built with Next.js 16, Supabase for authentication and database, Tailwind CSS for styling, and shadcn/ui components.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+### 🌟 Live Demo
 
-## Deployment
+**[View Live Website](https://vercel.com/neziraworku198-gmailcoms-projects/v0-hira-muslim-association-website)**
 
-Your project is live at:
+## ✨ Features
 
-**[https://vercel.com/neziraworku198-gmailcoms-projects/v0-hira-muslim-association-website](https://vercel.com/neziraworku198-gmailcoms-projects/v0-hira-muslim-association-website)**
+### Public Pages
+- **Homepage** - Hero section, about, activities, upcoming events preview, membership CTA, and contact form
+- **Events** - Graduation ceremony and annual exhibition pages with registration
+- **Membership** - Join association with detailed application form
+- **Contact** - Contact information and messaging form
 
-## Build your app
+### Event Registration System
+- **Graduation Ceremony Registration** - Collect student information, academic details, and payment receipt
+- **Exhibition Registration** - Two registration paths (exhibitor/facilitator or guest/company owner)
+- **Membership Applications** - Full application with area of interest selection
 
-Continue building your app on:
+### Admin Dashboard (Protected)
+- **Posts Management** - Create, edit, and delete announcements
+- **Registrations Overview** - View all event registrations by type
+- **Protected Routes** - Supabase authentication required
 
-**[https://v0.app/chat/qjhPY939KQ4](https://v0.app/chat/qjhPY939KQ4)**
+### Technical Features
+- ✅ Dark mode by default with theme toggle
+- ✅ Responsive design (mobile, tablet, desktop)
+- ✅ Image carousels with autoplay
+- ✅ Form validation with Zod
+- ✅ Toast notifications for user feedback
+- ✅ Backend webhook integration for form submissions
+- ✅ Accessibility compliant (ARIA labels, keyboard navigation)
 
-## How It Works
+## 🛠️ Tech Stack
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+| Category | Technologies |
+|----------|-------------|
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript 5 |
+| **Styling** | Tailwind CSS 3.4, shadcn/ui |
+| **Authentication** | Supabase Auth |
+| **Database** | Supabase PostgreSQL |
+| **Form Handling** | React Hook Form + Zod |
+| **Icons** | Lucide React |
+| **Components** | Radix UI primitives |
+| **Deployment** | Vercel |
+
+## 📁 Project Structure
+hira-portfolio/
+├── src/
+│ ├── app/
+│ │ ├── (marketing)/ # Public routes
+│ │ │ ├── page.tsx # Homepage
+│ │ │ ├── events/ # Events pages
+│ │ │ ├── membership/ # Membership page
+│ │ │ └── contact/ # Contact page
+│ │ ├── admin/ # Protected admin routes
+│ │ │ ├── page.tsx # Dashboard
+│ │ │ ├── posts/ # Blog posts CRUD
+│ │ │ └── registrations/ # View registrations
+│ │ ├── auth/login/ # Authentication
+│ │ └── api/submissions/ # Form submission endpoint
+│ ├── components/
+│ │ ├── marketing/ # Homepage sections
+│ │ ├── admin/ # Admin components
+│ │ ├── shared/ # Navbar, footer, theme toggle
+│ │ └── ui/ # shadcn/ui primitives
+│ ├── lib/
+│ │ └── supabase/ # Supabase clients
+│ └── hooks/ # Custom React hooks
+├── public/ # Static assets
+└── scripts/ # Database setup scripts
+
+text
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18.18 or higher
+- npm, pnpm, or yarn
+- Supabase account (free tier works)
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/Jennah198/hira-portfolio.git
+cd hira-portfolio
+Install dependencies
+
+bash
+npm install
+# or
+pnpm install
+Set up environment variables
+
+bash
+cp .env.example .env.local
+Fill in your environment variables (see Environment Variables section).
+
+Set up Supabase
+
+Run the SQL scripts in scripts/001_create_tables.sql in your Supabase SQL editor to create:
+
+registrations table
+
+posts table
+
+RLS policies
+
+Run development server
+
+bash
+npm run dev
+Open http://localhost:3000
+
+🔧 Environment Variables
+Create a .env.local file:
+
+env
+# Supabase (Required)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Webhook Integration (Optional)
+SUBMISSION_WEBHOOK_URL=https://your-backend.com/api/submit
+SUBMISSION_WEBHOOK_TOKEN=your_secret_token
+
+# Rate Limiting (Optional - for API routes)
+UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+📝 Available Scripts
+Command	Description
+npm run dev	Start development server with hot reload
+npm run build	Create production build
+npm run start	Start production server
+npm run lint	Run ESLint for code quality
+npm run lint:fix	Auto-fix linting issues
+
+🔐 Authentication & Security
+Admin Access
+Default admin route: /admin
+
+Create first admin user through Supabase Auth
+
+Middleware protects all /admin/* routes
+
+RLS Policies
+Database is secured with Row Level Security:
+
+Anyone can insert registrations
+
+Only authenticated users can view registrations
+
+Only admins can manage posts
+
+📱 Key Features Documentation
+Form Submissions
+All forms submit to /api/submissions which:
+
+Validates input with Zod
+
+Optionally forwards to external webhook
+
+Logs to server console (fallback)
+
+Returns success/failure response
+
+Event Registration Types
+Graduation: Full name, school, phone, telegram, ID card, email (optional), address, payment receipt
+
+Exhibition: Two paths - Exhibitor (project details) or Guest (company details)
+
+Membership: Complete application with area of interest
+
+Dark Mode
+Defaults to dark mode
+
+Toggle via theme button in navbar
+
+Persists across sessions using next-themes
+
+Support & Contact
+For issues or questions:
+
+Create an issue in the repository
+
