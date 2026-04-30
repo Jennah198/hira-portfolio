@@ -7,7 +7,7 @@ A modern, full-stack website for Hira Muslim Association, featuring event regist
 
 ### 🌟 Live Demo
 
-**[View Live Website](https://vercel.com/neziraworku198-gmailcoms-projects/v0-hira-muslim-association-website)**
+**[View Live Website](https://v0-hira-muslim-association-website.vercel.app/)**
 
 ## ✨ Features
 
@@ -51,30 +51,31 @@ A modern, full-stack website for Hira Muslim Association, featuring event regist
 | **Deployment** | Vercel |
 
 ## 📁 Project Structure
+```text
 hira-portfolio/
 ├── src/
-│ ├── app/
-│ │ ├── (marketing)/ # Public routes
-│ │ │ ├── page.tsx # Homepage
-│ │ │ ├── events/ # Events pages
-│ │ │ ├── membership/ # Membership page
-│ │ │ └── contact/ # Contact page
-│ │ ├── admin/ # Protected admin routes
-│ │ │ ├── page.tsx # Dashboard
-│ │ │ ├── posts/ # Blog posts CRUD
-│ │ │ └── registrations/ # View registrations
-│ │ ├── auth/login/ # Authentication
-│ │ └── api/submissions/ # Form submission endpoint
-│ ├── components/
-│ │ ├── marketing/ # Homepage sections
-│ │ ├── admin/ # Admin components
-│ │ ├── shared/ # Navbar, footer, theme toggle
-│ │ └── ui/ # shadcn/ui primitives
-│ ├── lib/
-│ │ └── supabase/ # Supabase clients
-│ └── hooks/ # Custom React hooks
-├── public/ # Static assets
-└── scripts/ # Database setup scripts
+│   ├── app/
+│   │   ├── (marketing)/                 # Public routes
+│   │   │   ├── page.tsx                 # Homepage
+│   │   │   ├── events/                  # Events pages
+│   │   │   ├── membership/              # Membership page
+│   │   │   └── contact/                 # Contact page
+│   │   ├── admin/                       # Protected admin routes
+│   │   │   ├── page.tsx                 # Dashboard
+│   │   │   ├── posts/                   # Blog posts CRUD
+│   │   │   └── registrations/           # View registrations
+│   │   ├── auth/login/                  # Authentication
+│   │   └── api/submissions/             # Form submission endpoint
+│   ├── components/
+│   │   ├── marketing/                   # Homepage sections
+│   │   ├── admin/                       # Admin components
+│   │   ├── shared/                      # Navbar, footer, theme toggle
+│   │   └── ui/                          # shadcn/ui primitives
+│   ├── lib/
+│   │   └── supabase/                    # Supabase clients
+│   └── hooks/                           # Custom React hooks
+├── public/                              # Static assets
+└── scripts/                             # Database setup scripts
 
 text
 
