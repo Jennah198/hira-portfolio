@@ -40,7 +40,7 @@ export function Hero() {
               asChild
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
+              className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white bg-black/30"
             >
               <Link href="#activities">Explore Our Activities</Link>
             </Button>

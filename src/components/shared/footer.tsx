@@ -15,7 +15,7 @@ export function Footer() {
                   alt="Hira Muslim Students Association"
                   width={48}
                   height={48}
-                  className="rounded-full"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <h3 className="font-bold text-lg">Hira Muslim Students Association</h3>

@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Mail, Phone, MapPin, Facebook, Instagram, Send } from "lucide-react"
 import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ContactPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,10 +20,24 @@ export default function ContactPage() {
     message: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Contact form submitted:", formData)
-    // Handle form submission
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "contact", payload: formData }),
+      })
+      if (!res.ok) throw new Error("Unable to submit contact form")
+      setFormData({ name: "", email: "", subject: "", message: "" })
+      toast({ title: "Message sent", description: "We will contact you shortly." })
+    } catch (error) {
+      toast({
+        title: "Submission failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

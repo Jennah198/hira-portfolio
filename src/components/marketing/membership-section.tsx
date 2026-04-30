@@ -2,39 +2,58 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Users, Rocket, Award } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-
-const formSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  university: z.string().min(2, "Please enter your university or department"),
-  areaOfInterest: z.string().min(1, "Please select an area of interest"),
-})
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export function MembershipSection() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      university: "",
-      areaOfInterest: "",
-    },
+  const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    studentId: "",
+    program: "",
+    year: "",
+    motivation: "",
+    areaOfInterest: "",
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    // Handle form submission
-    alert("Thank you for your interest! We will contact you soon.")
-    form.reset()
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "membership-application", payload: formData }),
+      })
+      if (!res.ok) throw new Error("Could not submit application")
+      toast({ title: "Application submitted", description: "We will contact you shortly." })
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        studentId: "",
+        program: "",
+        year: "",
+        motivation: "",
+        areaOfInterest: "",
+      })
+    } catch (error) {
+      toast({
+        title: "Submission failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -122,96 +141,98 @@ export function MembershipSection() {
           {/* Right: Registration Form */}
           <Card className="border-2">
             <CardContent className="pt-6">
-              <h3 className="text-2xl font-semibold mb-6 text-center">Registration Form</h3>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Abdulah" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <h3 className="text-2xl font-semibold mb-6 text-center">Application Form</h3>
+              <form onSubmit={onSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="member-full-name">Full Name *</Label>
+                  <Input
+                    id="member-full-name"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, fullName: e.target.value }))}
+                    required
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="Abdulah@gmail.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-email">Email Address *</Label>
+                  <Input
+                    id="member-email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                    required
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="+2519 123 456" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-phone">Phone Number *</Label>
+                  <Input
+                    id="member-phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                    required
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="university"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>University / School</FormLabel>
-                        <FormControl>
-                          <Input placeholder="School Name or University Department" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-student-id">Student ID *</Label>
+                  <Input
+                    id="member-student-id"
+                    value={formData.studentId}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, studentId: e.target.value }))}
+                    required
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="areaOfInterest"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Area of Interest</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select your area of interest" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="education">Educational Programs</SelectItem>
-                            <SelectItem value="charity">Charity & Community Service</SelectItem>
-                            <SelectItem value="leadership">Leadership Development</SelectItem>
-                            <SelectItem value="social">Social & spiritual Events</SelectItem>
-                            <SelectItem value="spiritual">Spiritual Growth</SelectItem>
-                            <SelectItem value="environmental">Environmental Initiatives</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-program">Program of Study *</Label>
+                  <Input
+                    id="member-program"
+                    value={formData.program}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, program: e.target.value }))}
+                    required
                   />
-
-                  <Button type="submit" className="w-full" size="lg">
-                    Submit Application
-                  </Button>
-                </form>
-              </Form>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-year">Year of Study *</Label>
+                  <Input
+                    id="member-year"
+                    value={formData.year}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, year: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-area-interest">Area of Interest *</Label>
+                  <Select
+                    value={formData.areaOfInterest}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, areaOfInterest: value }))}
+                    required
+                  >
+                    <SelectTrigger id="member-area-interest">
+                      <SelectValue placeholder="Select your area of interest" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="education">Educational Programs</SelectItem>
+                      <SelectItem value="charity">Charity & Community Service</SelectItem>
+                      <SelectItem value="leadership">Leadership Development</SelectItem>
+                      <SelectItem value="social">Social & Spiritual Events</SelectItem>
+                      <SelectItem value="spiritual">Spiritual Growth</SelectItem>
+                      <SelectItem value="environmental">Environmental Initiatives</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="member-motivation">Why do you want to join Hira? *</Label>
+                  <Textarea
+                    id="member-motivation"
+                    rows={4}
+                    value={formData.motivation}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, motivation: e.target.value }))}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" size="lg" disabled={isSubmitting} aria-label="Submit member application">
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>

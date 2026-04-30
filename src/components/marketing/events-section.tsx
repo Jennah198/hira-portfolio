@@ -1,13 +1,30 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 import { Award, Calendar } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import type { CarouselApi } from "@/components/ui/carousel"
 
 export function EventsSection() {
+  const [graduationApi, setGraduationApi] = useState<CarouselApi>()
+  const [exhibitionApi, setExhibitionApi] = useState<CarouselApi>()
+
+  useEffect(() => {
+    if (!graduationApi) return
+    const timer = setInterval(() => graduationApi.scrollNext(), 3500)
+    return () => clearInterval(timer)
+  }, [graduationApi])
+
+  useEffect(() => {
+    if (!exhibitionApi) return
+    const timer = setInterval(() => exhibitionApi.scrollNext(), 3500)
+    return () => clearInterval(timer)
+  }, [exhibitionApi])
+
   const graduationImages = [
     "/images/gradwithredgawn.png",
     "/images/certificates.png",
@@ -37,7 +54,7 @@ export function EventsSection() {
             <Card className="border-border overflow-hidden">
               <div className="grid md:grid-cols-2 gap-0">
                 <div className="relative bg-background">
-                  <Carousel className="w-full">
+                  <Carousel className="w-full" setApi={setGraduationApi}>
                     <CarouselContent>
                       {graduationImages.map((image, index) => (
                         <CarouselItem key={index}>
@@ -70,10 +87,10 @@ export function EventsSection() {
                     and service to the community. Join us in recognizing their dedication as they embark on their next chapter.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild className="bg-accent hover:bg-accent/90">
+                    <Button asChild className="bg-accent hover:bg-accent/90" aria-label="Attend the next graduation event">
                       <Link href="/events#graduation">Attend Next Event</Link>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="bg-background/80" aria-label="Register for graduation ceremony">
                       <Link href="/events/graduation/register">Register Now</Link>
                     </Button>
                   </div>
@@ -99,17 +116,17 @@ export function EventsSection() {
                     technology, arts, social sciences, and more.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild className="bg-accent hover:bg-accent/90">
+                    <Button asChild className="bg-accent hover:bg-accent/90" aria-label="Attend the next exhibition event">
                       <Link href="/events#exhibition">Attend Next Event</Link>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="bg-background/80" aria-label="Register for annual exhibition">
                       <Link href="/events/exhibition/register">Register Now</Link>
                     </Button>
                   </div>
                 </div>
 
                 <div className="order-1 md:order-2 relative bg-background">
-                  <Carousel className="w-full">
+                  <Carousel className="w-full" setApi={setExhibitionApi}>
                     <CarouselContent>
                       {exhibitionImages.map((image, index) => (
                         <CarouselItem key={index}>

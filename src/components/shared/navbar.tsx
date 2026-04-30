@@ -2,14 +2,17 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { Menu, X, ChevronDown, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+  const showBackHome = pathname !== "/"
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -28,9 +31,9 @@ export function Navbar() {
             <Image
               src="/images/hira-20logo.jpg"
               alt="Hira Muslim Students Association"
-              width={50}
-              height={50}
-              className="rounded-full"
+              width={10}
+              height={10}
+              className="w-1/6 h-1/6 object-cover rounded-full"
             />
             <span className="font-bold text-lg md:text-xl text-foreground">Hira</span>
           </Link>
@@ -65,6 +68,14 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
             <ThemeToggle />
+            {showBackHome && (
+              <Button asChild variant="outline" className="bg-background/80" aria-label="Go back to home">
+                <Link href="/">
+                  <ArrowLeft className="size-4" />
+                  Home
+                </Link>
+              </Button>
+            )}
             <Button asChild className="bg-primary hover:bg-primary/90">
               <Link href="/membership">Become a Member</Link>
             </Button>
@@ -114,6 +125,14 @@ export function Navbar() {
               </Link>
             </div>
             <div className="pt-2">
+              {showBackHome && (
+                <Button asChild variant="outline" className="w-full bg-background/80 mb-2" aria-label="Go back to home">
+                  <Link href="/" onClick={() => setIsOpen(false)}>
+                    <ArrowLeft className="size-4" />
+                    Home
+                  </Link>
+                </Button>
+              )}
               <Button asChild className="w-full bg-primary hover:bg-primary/90">
                 <Link href="/membership" onClick={() => setIsOpen(false)}>
                   Become a Member

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Award, BookOpen, Calendar, Users, MapPin } from "lucide-react"
 import type { Metadata } from "next"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Events - Hira Muslim Students Association",
@@ -65,7 +66,9 @@ export default function EventsPage() {
                     </div>
                   </div>
                 </div>
-                <Button size="lg">Register for Next Event</Button>
+                <Button asChild size="lg" aria-label="Register for graduation event">
+                  <Link href="/events/graduation/register">Register for Next Event</Link>
+                </Button>
               </div>
               <div className="order-1 md:order-2">
                 <Card className="border-border overflow-hidden">
@@ -192,7 +195,9 @@ export default function EventsPage() {
                     </div>
                   </div>
                 </div>
-                <Button size="lg">Submit Your Project</Button>
+                <Button asChild size="lg" aria-label="Register for exhibition">
+                  <Link href="/events/exhibition/register">Submit Your Project</Link>
+                </Button>
               </div>
             </div>
 

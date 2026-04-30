@@ -23,17 +23,32 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "contact",
+          payload: formData,
+        }),
+      })
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (!res.ok) throw new Error("Failed to send your message")
 
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
-    })
-
-    setFormData({ name: "", email: "", message: "" })
-    setIsSubmitting(false)
+      toast({
+        title: "Message sent!",
+        description: "We'll get back to you as soon as possible.",
+      })
+      setFormData({ name: "", email: "", message: "" })
+    } catch (error) {
+      toast({
+        title: "Could not send message",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -111,7 +126,7 @@ export function ContactSection() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
+                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-background/70"
                   asChild
                 >
                   <a href="https://t.me/HiraMuslimstudent" aria-label="Telegram" >
@@ -123,7 +138,7 @@ export function ContactSection() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
+                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-background/70"
                   asChild
                 >
                   <a href="https://www.instagram.com/hira_muslim_students_page1/" aria-label="Instagram" target="blank">
@@ -135,7 +150,7 @@ export function ContactSection() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
+                  className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors bg-background/70"
                   asChild
                 >
                   <a href="#" aria-label="Facebook" >

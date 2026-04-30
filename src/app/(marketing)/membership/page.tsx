@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2 } from "lucide-react"
 import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MembershipPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -21,10 +23,32 @@ export default function MembershipPage() {
     motivation: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Form submitted:", formData)
-    // Handle form submission
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "membership-application", payload: formData }),
+      })
+      if (!res.ok) throw new Error("Could not submit application")
+      toast({ title: "Application submitted", description: "We will contact you shortly." })
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        studentId: "",
+        program: "",
+        year: "",
+        motivation: "",
+      })
+    } catch (error) {
+      toast({
+        title: "Submission failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
