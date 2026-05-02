@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 const registrationSchema = z.object({
   full_name: z.string().min(2, 'Name is required'),
@@ -23,15 +23,17 @@ type RegistrationFormProps = {
   buttonText?: string
 }
 
+type RegistrationValues = z.infer<typeof registrationSchema>
+
 export function RegistrationForm({ eventType, buttonText = 'Register Now' }: RegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const supabase = createClientComponentClient()
-  
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const supabase = createClient()
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<RegistrationValues>({
     resolver: zodResolver(registrationSchema)
   })
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: RegistrationValues) => {
     setIsSubmitting(true)
     
     const { error } = await supabase
@@ -63,13 +65,17 @@ export function RegistrationForm({ eventType, buttonText = 'Register Now' }: Reg
       <div>
         <Label htmlFor="full_name">Full Name *</Label>
         <Input id="full_name" {...register('full_name')} />
-        {errors.full_name && <p className="text-sm text-red-500">{errors.full_name.message}</p>}
+        {errors.full_name?.message != null && (
+          <p className="text-sm text-red-500">{String(errors.full_name.message)}</p>
+        )}
       </div>
 
       <div>
         <Label htmlFor="email">Email (Optional)</Label>
         <Input id="email" type="email" {...register('email')} />
-        {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+        {errors.email?.message != null && (
+          <p className="text-sm text-red-500">{String(errors.email.message)}</p>
+        )}
       </div>
 
       <div>
