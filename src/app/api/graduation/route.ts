@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       if ("error" in up) {
         return NextResponse.json({ error: "Receipt upload failed", details: up.error }, { status: 400 })
       }
-      paymentReceiptUrl = up.publicUrl
+      paymentReceiptUrl = up.path
     } else if (receiptEntry !== null && !(receiptEntry instanceof File)) {
       return NextResponse.json({ error: "Invalid receipt file" }, { status: 400 })
     }

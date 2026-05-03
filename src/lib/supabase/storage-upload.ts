@@ -70,7 +70,7 @@ export async function uploadFormFile(params: {
   file: File
   folder: string
   kind: "receipt" | "mvp"
-}): Promise<{ publicUrl: string } | { error: string }> {
+}): Promise<{ path: string } | { error: string }> {
   const maxBytes = params.kind === "receipt" ? RECEIPT_MAX_BYTES : MVP_MAX_BYTES
 
   if (params.file.size > maxBytes) {
@@ -107,7 +107,7 @@ export async function uploadFormFile(params: {
                   ? "application/zip"
                   : "application/octet-stream")
 
-  const { error } = await params.supabase.storage
+  const { data: uploadData, error } = await params.supabase.storage
     .from(params.bucket)
     .upload(objectPath, body, { contentType, upsert: false })
 
@@ -115,6 +115,9 @@ export async function uploadFormFile(params: {
     return { error: error.message }
   }
 
-  const { data } = params.supabase.storage.from(params.bucket).getPublicUrl(objectPath)
-  return { publicUrl: data.publicUrl }
+  if (!uploadData?.path) {
+    return { error: "Upload succeeded but no storage path was returned" }
+  }
+
+  return { path: uploadData.path }
 }

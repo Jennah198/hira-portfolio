@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       program_of_study: parsed.data.program_of_study.trim(),
       project_name: parsed.data.project_name.trim(),
       project_explanation: parsed.data.project_explanation.trim(),
-      mvp_demo_url: up.publicUrl,
+      mvp_demo_url: up.path,
     })
 
     if (error) {
