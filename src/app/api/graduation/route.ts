@@ -1,3 +1,14 @@
+/**
+ * TABLE: public.graduation_registrations
+ * Columns: id (uuid, PK, default: gen_random_uuid()), full_name (text, NOT NULL),
+ *   school_name (text, NOT NULL), phone_number (text, NOT NULL),
+ *   telegram_username (text, NOT NULL), id_card_number (text, optional),
+ *   email (text, optional), address (text, NOT NULL),
+ *   payment_receipt_url (text, NOT NULL), created_at (timestamptz, default: now())
+ * Policy: graduation_registrations_insert_public (INSERT for anon)
+ * Storage: receipts bucket (anon INSERT, anon SELECT) → payment_receipt_url
+ */
+
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"

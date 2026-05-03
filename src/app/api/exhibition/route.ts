@@ -1,3 +1,14 @@
+/**
+ * TABLE: public.exhibition_registrations
+ * Columns: id (uuid, PK, default: gen_random_uuid()), full_name (text, NOT NULL),
+ *   email (text, optional), phone_number (text, NOT NULL),
+ *   program_of_study (text, NOT NULL), project_name (text, NOT NULL),
+ *   project_explanation (text, NOT NULL), mvp_demo_url (text, NOT NULL),
+ *   created_at (timestamptz, default: now())
+ * Policy: exhibition_registrations_insert_public (INSERT for anon)
+ * Storage: mvp-demos bucket (anon INSERT, anon SELECT) → mvp_demo_url
+ */
+
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"

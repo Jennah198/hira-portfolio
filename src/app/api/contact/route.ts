@@ -1,3 +1,11 @@
+/**
+ * TABLE: public.contact_messages
+ * Columns: id (uuid, PK, default: gen_random_uuid()), name (text, NOT NULL),
+ *   email (text, NOT NULL), message (text, NOT NULL), created_at (timestamptz, default: now())
+ * Policy: contact_messages_insert_public (INSERT for anon)
+ * Storage: None (no file uploads)
+ */
+
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
