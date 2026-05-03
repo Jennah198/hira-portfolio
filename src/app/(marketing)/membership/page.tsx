@@ -10,10 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2 } from "lucide-react"
 import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
+import {
+  getSubmissionErrorMessage,
+  toastSubmissionError,
+  toastSubmissionSuccess,
+} from "@/lib/submission-toasts"
 
 export default function MembershipPage() {
-  const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
@@ -35,8 +38,12 @@ export default function MembershipPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "membership-application", payload: formData }),
       })
-      if (!res.ok) throw new Error("Could not submit application")
-      toast({ title: "Application submitted", description: "We will contact you shortly." })
+      const payload = await res.json().catch(() => null)
+      if (!res.ok) {
+        toastSubmissionError(getSubmissionErrorMessage(payload, "Could not submit application"))
+        return
+      }
+      toastSubmissionSuccess()
       setFormData({
         fullName: "",
         email: "",
@@ -48,11 +55,7 @@ export default function MembershipPage() {
         areaOfInterest: "",
       })
     } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      })
+      toastSubmissionError(error instanceof Error ? error.message : "Please try again.")
     } finally {
       setIsSubmitting(false)
     }

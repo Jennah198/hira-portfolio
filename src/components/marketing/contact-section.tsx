@@ -9,10 +9,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import {
+  getSubmissionErrorMessage,
+  toastSubmissionError,
+  toastSubmissionSuccess,
+} from "@/lib/submission-toasts"
 
 export function ContactSection() {
-  const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -30,20 +33,15 @@ export function ContactSection() {
         body: JSON.stringify(formData),
       })
 
-      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
-      if (!res.ok) throw new Error(data.details || data.error || "Failed to send your message")
-
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you as soon as possible.",
-      })
+      const payload = await res.json().catch(() => null)
+      if (!res.ok) {
+        toastSubmissionError(getSubmissionErrorMessage(payload, "Failed to send your message"))
+        return
+      }
+      toastSubmissionSuccess()
       setFormData({ name: "", email: "", message: "" })
     } catch (error) {
-      toast({
-        title: "Could not send message",
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      })
+      toastSubmissionError(error instanceof Error ? error.message : "Please try again.")
     } finally {
       setIsSubmitting(false)
     }

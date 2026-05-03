@@ -28,10 +28,16 @@ export async function updateSession(request: NextRequest) {
   // Refresh session if expired
   await supabase.auth.getSession()
   
-  // Protect admin routes
-  const { data: { session } } = await supabase.auth.getSession()
-  if (request.nextUrl.pathname.startsWith('/admin') && !session) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
+  // Supabase-backed admin sections only (submission dashboard uses env password instead)
+  const pathname = request.nextUrl.pathname
+  const isLegacyAdminProtected =
+    pathname.startsWith("/admin/posts") || pathname.startsWith("/admin/registrations")
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (isLegacyAdminProtected && !session) {
+    return NextResponse.redirect(new URL("/auth/login", request.url))
   }
 
   return response

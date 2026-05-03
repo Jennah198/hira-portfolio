@@ -7,12 +7,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import {
+  getSubmissionErrorMessage,
+  toastSubmissionError,
+  toastSubmissionSuccess,
+} from "@/lib/submission-toasts"
 
 type Mode = "facilitator" | "guest-company"
 
 export default function ExhibitionRegistrationPage() {
-  const { toast } = useToast()
   const mvpFileRef = useRef<HTMLInputElement>(null)
   const [mvpResetKey, setMvpResetKey] = useState(0)
   const [mode, setMode] = useState<Mode>("facilitator")
@@ -41,11 +44,7 @@ export default function ExhibitionRegistrationPage() {
       if (mode === "facilitator") {
         const demo = mvpFileRef.current?.files?.[0]
         if (!demo || demo.size === 0) {
-          toast({
-            title: "Demo file required",
-            description: "Please upload your MVP or demo file.",
-            variant: "destructive",
-          })
+          toastSubmissionError("Please upload your MVP or demo file.")
           return
         }
 
@@ -64,10 +63,12 @@ export default function ExhibitionRegistrationPage() {
           method: "POST",
           body: fd,
         })
-        const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
-        if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
-
-        toast({ title: "Registration submitted", description: "We received your exhibition registration." })
+        const payload = await res.json().catch(() => null)
+        if (!res.ok) {
+          toastSubmissionError(getSubmissionErrorMessage(payload, "Could not submit registration"))
+          return
+        }
+        toastSubmissionSuccess()
         setFacilitator({
           fullName: "",
           email: "",
@@ -88,15 +89,14 @@ export default function ExhibitionRegistrationPage() {
           payload: company,
         }),
       })
-      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
-      if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
-      toast({ title: "Registration submitted", description: "We received your exhibition registration." })
+      const payload = await res.json().catch(() => null)
+      if (!res.ok) {
+        toastSubmissionError(getSubmissionErrorMessage(payload, "Could not submit registration"))
+        return
+      }
+      toastSubmissionSuccess()
     } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      })
+      toastSubmissionError(error instanceof Error ? error.message : "Please try again.")
     } finally {
       setIsSubmitting(false)
     }

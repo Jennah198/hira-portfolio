@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import {
+  getSubmissionErrorMessage,
+  toastSubmissionError,
+  toastSubmissionSuccess,
+} from "@/lib/submission-toasts"
 
 export default function GraduationRegistrationPage() {
-  const { toast } = useToast()
   const receiptInputRef = useRef<HTMLInputElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [receiptResetKey, setReceiptResetKey] = useState(0)
@@ -50,10 +53,12 @@ export default function GraduationRegistrationPage() {
         body: fd,
       })
 
-      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
-      if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
-
-      toast({ title: "Registration submitted", description: "We received your graduation registration." })
+      const payload = await res.json().catch(() => null)
+      if (!res.ok) {
+        toastSubmissionError(getSubmissionErrorMessage(payload, "Could not submit registration"))
+        return
+      }
+      toastSubmissionSuccess()
       setFormData({
         fullName: "",
         schoolName: "",
@@ -65,11 +70,7 @@ export default function GraduationRegistrationPage() {
       })
       setReceiptResetKey((k) => k + 1)
     } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      })
+      toastSubmissionError(error instanceof Error ? error.message : "Please try again.")
     } finally {
       setIsSubmitting(false)
     }
