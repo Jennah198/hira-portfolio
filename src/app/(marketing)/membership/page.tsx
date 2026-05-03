@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2 } from "lucide-react"
 import { useState } from "react"
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function MembershipPage() {
   const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -21,10 +23,12 @@ export default function MembershipPage() {
     program: "",
     year: "",
     motivation: "",
+    areaOfInterest: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     try {
       const res = await fetch("/api/submissions", {
         method: "POST",
@@ -41,6 +45,7 @@ export default function MembershipPage() {
         program: "",
         year: "",
         motivation: "",
+        areaOfInterest: "",
       })
     } catch (error) {
       toast({
@@ -48,6 +53,8 @@ export default function MembershipPage() {
         description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -200,6 +207,27 @@ export default function MembershipPage() {
                       </div>
 
                       <div className="space-y-2">
+                        <Label htmlFor="areaOfInterest">Area of Interest *</Label>
+                        <Select
+                          value={formData.areaOfInterest}
+                          onValueChange={(value) => setFormData((prev) => ({ ...prev, areaOfInterest: value }))}
+                          required
+                        >
+                          <SelectTrigger id="areaOfInterest">
+                            <SelectValue placeholder="Select your area of interest" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="education">Educational Programs</SelectItem>
+                            <SelectItem value="charity">Charity & Community Service</SelectItem>
+                            <SelectItem value="leadership">Leadership Development</SelectItem>
+                            <SelectItem value="social">Social & Spiritual Events</SelectItem>
+                            <SelectItem value="spiritual">Spiritual Growth</SelectItem>
+                            <SelectItem value="environmental">Environmental Initiatives</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
                         <Label htmlFor="motivation">Why do you want to join Hira? *</Label>
                         <Textarea
                           id="motivation"
@@ -212,8 +240,8 @@ export default function MembershipPage() {
                         />
                       </div>
 
-                      <Button type="submit" size="lg" className="w-full">
-                        Submit Application
+                      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? "Submitting..." : "Submit Application"}
                       </Button>
 
                       <p className="text-xs text-muted-foreground text-center">

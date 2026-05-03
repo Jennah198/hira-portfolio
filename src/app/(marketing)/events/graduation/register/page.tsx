@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,9 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function GraduationRegistrationPage() {
   const { toast } = useToast()
+  const receiptInputRef = useRef<HTMLInputElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [receiptResetKey, setReceiptResetKey] = useState(0)
   const [formData, setFormData] = useState({
     fullName: "",
     schoolName: "",
@@ -19,22 +21,38 @@ export default function GraduationRegistrationPage() {
     faydaId: "",
     email: "",
     address: "",
-    paymentReceiptUrl: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const res = await fetch("/api/submissions", {
+      const fd = new FormData()
+      fd.append("full_name", formData.fullName.trim())
+      fd.append("school_name", formData.schoolName.trim())
+      fd.append("phone_number", formData.phone.trim())
+      fd.append("telegram_username", formData.telegram.trim())
+      if (formData.faydaId.trim()) {
+        fd.append("id_card_number", formData.faydaId.trim())
+      }
+      if (formData.email.trim()) {
+        fd.append("email", formData.email.trim())
+      }
+      fd.append("address", formData.address.trim())
+
+      const receiptFile = receiptInputRef.current?.files?.[0]
+      if (receiptFile && receiptFile.size > 0) {
+        fd.append("receipt", receiptFile)
+      }
+
+      const res = await fetch("/api/graduation", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "graduation-registration",
-          payload: formData,
-        }),
+        body: fd,
       })
-      if (!res.ok) throw new Error("Could not submit registration")
+
+      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
+      if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
+
       toast({ title: "Registration submitted", description: "We received your graduation registration." })
       setFormData({
         fullName: "",
@@ -44,8 +62,8 @@ export default function GraduationRegistrationPage() {
         faydaId: "",
         email: "",
         address: "",
-        paymentReceiptUrl: "",
       })
+      setReceiptResetKey((k) => k + 1)
     } catch (error) {
       toast({
         title: "Submission failed",
@@ -85,8 +103,8 @@ export default function GraduationRegistrationPage() {
                 <Input id="telegram" required value={formData.telegram} onChange={(e) => setFormData((p) => ({ ...p, telegram: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="faydaId">ID Card (Fayda) *</Label>
-                <Input id="faydaId" required value={formData.faydaId} onChange={(e) => setFormData((p) => ({ ...p, faydaId: e.target.value }))} />
+                <Label htmlFor="faydaId">ID Card (Fayda) (optional)</Label>
+                <Input id="faydaId" value={formData.faydaId} onChange={(e) => setFormData((p) => ({ ...p, faydaId: e.target.value }))} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email (Optional)</Label>
@@ -97,8 +115,16 @@ export default function GraduationRegistrationPage() {
                 <Input id="address" required value={formData.address} onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="paymentReceiptUrl">Payment Receipt Screenshot (Optional URL)</Label>
-                <Input id="paymentReceiptUrl" value={formData.paymentReceiptUrl} onChange={(e) => setFormData((p) => ({ ...p, paymentReceiptUrl: e.target.value }))} />
+                <Label htmlFor="graduation-receipt-upload">Payment receipt (screenshot or PDF, optional)</Label>
+                <Input
+                  key={receiptResetKey}
+                  ref={receiptInputRef}
+                  id="graduation-receipt-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground">Max 10 MB. Images or PDF.</p>
               </div>
               <p className="text-sm text-muted-foreground">Need additional information? Call: +251 96 452 1722</p>
               <Button type="submit" className="w-full" disabled={isSubmitting}>

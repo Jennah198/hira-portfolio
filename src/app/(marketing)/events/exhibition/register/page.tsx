@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,8 @@ type Mode = "facilitator" | "guest-company"
 
 export default function ExhibitionRegistrationPage() {
   const { toast } = useToast()
+  const mvpFileRef = useRef<HTMLInputElement>(null)
+  const [mvpResetKey, setMvpResetKey] = useState(0)
   const [mode, setMode] = useState<Mode>("facilitator")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [facilitator, setFacilitator] = useState({
@@ -22,7 +24,6 @@ export default function ExhibitionRegistrationPage() {
     programOfStudy: "",
     projectName: "",
     projectExplanation: "",
-    mvpDemoFileName: "",
   })
   const [company, setCompany] = useState({
     companyName: "",
@@ -37,16 +38,58 @@ export default function ExhibitionRegistrationPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const payload = mode === "facilitator" ? facilitator : company
+      if (mode === "facilitator") {
+        const demo = mvpFileRef.current?.files?.[0]
+        if (!demo || demo.size === 0) {
+          toast({
+            title: "Demo file required",
+            description: "Please upload your MVP or demo file.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        const fd = new FormData()
+        fd.append("full_name", facilitator.fullName.trim())
+        fd.append("phone_number", facilitator.phone.trim())
+        fd.append("program_of_study", facilitator.programOfStudy.trim())
+        fd.append("project_name", facilitator.projectName.trim())
+        fd.append("project_explanation", facilitator.projectExplanation.trim())
+        if (facilitator.email.trim()) {
+          fd.append("email", facilitator.email.trim())
+        }
+        fd.append("mvp_demo", demo)
+
+        const res = await fetch("/api/exhibition", {
+          method: "POST",
+          body: fd,
+        })
+        const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
+        if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
+
+        toast({ title: "Registration submitted", description: "We received your exhibition registration." })
+        setFacilitator({
+          fullName: "",
+          email: "",
+          phone: "",
+          programOfStudy: "",
+          projectName: "",
+          projectExplanation: "",
+        })
+        setMvpResetKey((k) => k + 1)
+        return
+      }
+
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: mode === "facilitator" ? "exhibition-facilitator" : "exhibition-guest-company",
-          payload,
+          type: "exhibition-guest-company",
+          payload: company,
         }),
       })
-      if (!res.ok) throw new Error("Could not submit registration")
+      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
+      if (!res.ok) throw new Error(data.details || data.error || "Could not submit registration")
       toast({ title: "Registration submitted", description: "We received your exhibition registration." })
     } catch (error) {
       toast({
@@ -104,16 +147,15 @@ export default function ExhibitionRegistrationPage() {
                   <div className="space-y-2">
                     <Label htmlFor="facilitator-mvp">Upload MVP / Demo *</Label>
                     <Input
+                      key={mvpResetKey}
+                      ref={mvpFileRef}
                       id="facilitator-mvp"
                       type="file"
                       required
-                      onChange={(e) =>
-                        setFacilitator((p) => ({
-                          ...p,
-                          mvpDemoFileName: e.target.files?.[0]?.name ?? "",
-                        }))
-                      }
+                      accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4,video/webm,application/zip"
+                      className="cursor-pointer"
                     />
+                    <p className="text-xs text-muted-foreground">Max 30 MB. Images, PDF, video, or ZIP.</p>
                   </div>
                 </>
               ) : (

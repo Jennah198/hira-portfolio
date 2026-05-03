@@ -24,16 +24,14 @@ export function ContactSection() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const res = await fetch("/api/submissions", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "contact",
-          payload: formData,
-        }),
+        body: JSON.stringify(formData),
       })
 
-      if (!res.ok) throw new Error("Failed to send your message")
+      const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string }
+      if (!res.ok) throw new Error(data.details || data.error || "Failed to send your message")
 
       toast({
         title: "Message sent!",
