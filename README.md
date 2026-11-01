@@ -34,6 +34,9 @@ pnpm dev                     # http://localhost:3000
 | `ADMIN_PASSWORD` | yes | Password for `/admin`. Never prefix with `NEXT_PUBLIC_` |
 | `ADMIN_SESSION_SECRET` | recommended | Random string used to sign admin sessions |
 | `NEXT_PUBLIC_SITE_URL` | recommended | Production URL, e.g. `https://hira.org` (sitemap, share links) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | recommended | Cloudflare Turnstile spam protection (forms work without it) |
+| `CRON_SECRET` | yes (Vercel) | Protects the daily job: keeps Supabase awake + applies data retention |
+| `RESEND_API_KEY` / `ALERT_EMAIL_TO` / `ALERT_EMAIL_FROM` | optional | Email alert for every new submission |
 | `SUBMISSION_WEBHOOK_URL` / `SUBMISSION_WEBHOOK_TOKEN` | optional | Forward submissions to another service |
 
 ### Database
@@ -44,6 +47,20 @@ Private storage buckets: `receipts`, `mvp-demos`.
 
 Run `scripts/005_guest_table_and_security.sql` once in the Supabase SQL Editor: it creates the guest table and removes
 all public (anon-key) access. The app only uses the service-role key on the server.
+
+## Data protection & admin access
+
+- **Privacy Policy:** `/privacy` (all 8 languages). Keep it in sync with `src/lib/retention.ts`.
+- **Retention (automatic, daily at 03:00 UTC):** receipts & uploaded files 12 months · contact messages 12 months ·
+  event registrations 24 months · membership applications 36 months · unused uploads 24 hours.
+  Preview without deleting: `GET /api/cron/daily?dryRun=1` with `Authorization: Bearer $CRON_SECRET`.
+- **Admin password policy:**
+  - Share it with at most 2–3 named officers (e.g. president + secretary), never in group chats.
+  - Store it in a password manager; use 16+ random characters.
+  - Change it (Vercel → `ADMIN_PASSWORD`, then redeploy) whenever an officer leaves, and at least once a year.
+  - Changing `ADMIN_SESSION_SECRET` logs everyone out immediately.
+- **Admin tools:** view, export CSV, and delete records (deleting also removes the stored file).
+- Handle data-subject requests (see/correct/delete) from the admin dashboard.
 
 ## Scripts
 

@@ -27,6 +27,9 @@ Run `pnpm lint && pnpm typecheck && pnpm build` before committing. There is no t
 | `ADMIN_PASSWORD` | `/admin` dashboard login (`src/lib/admin-auth.ts`) | **server-only — never `NEXT_PUBLIC_`**. The old `NEXT_PUBLIC_ADMIN_PASSWORD` is no longer read at all |
 | `ADMIN_SESSION_SECRET` | signs admin session cookie | optional; defaults to a value derived from the password |
 | `SUBMISSION_WEBHOOK_URL`, `SUBMISSION_WEBHOOK_TOKEN` | `/api/submissions` | optional |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | forms + `/api/uploads`, `/api/contact`, `/api/submissions` | unset = check skipped (dev). Test keys in .env.example |
+| `CRON_SECRET` | `/api/cron/daily` (Vercel sends it as Bearer) | without it the cron returns 401 → no keep-alive/retention |
+| `RESEND_API_KEY`, `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM` | `src/lib/notify.ts` | optional email per submission (sent with `after()`) |
 
 Without Supabase env vars the public pages still render (proxy skips Supabase), but forms/admin data fail.
 
@@ -58,13 +61,31 @@ src/components/{admin,ui}
 scripts/*.sql               Supabase schema (run manually in SQL editor)
 ```
 
+## File uploads (direct to Supabase — Vercel limits request bodies to 4.5 MB)
+1. Browser → `POST /api/uploads {kind, contentType, size, turnstileToken}` → Turnstile + type/size check →
+   `{signedUrl, path, ticket}` (ticket = HMAC(kind:path:exp), 1 h, keyed by ADMIN_SESSION_SECRET).
+2. Browser `PUT`s the file to `signedUrl` (no API key needed).
+3. Form endpoint (`/api/graduation`, `/api/exhibition`, JSON) verifies ticket + `storage.info()` size, then inserts.
+- Buckets enforce `file_size_limit` + `allowed_mime_types` (receipts 10 MB img/pdf; mvp-demos 30 MB +mp4/webm/zip),
+  set via the storage API on 2026-11-01. Keep `src/lib/uploads.ts` UPLOAD_KINDS in sync.
+- Turnstile tokens are single-use: the upload step consumes it; the ticket proves it for the final submit.
+- Older rows store full storage URLs, newer ones paths → always normalise with `extractStorageObjectPath`.
+
+## Daily job `/api/cron/daily` (vercel.json, 03:00 UTC)
+Keep-alive query + retention (`src/lib/retention.ts`; must match Privacy Policy text) + orphan upload cleanup.
+Expired files: file deleted and column set to `"expired"` (columns are NOT NULL). `?dryRun=1` reports only.
+
+## Admin
+`/api/admin/records/[type]` (membership | contact | graduation | exhibition | exhibition-guests): GET list (signed
+file URLs), DELETE `?id=` (row + file). Dashboard has Export CSV (UTF-8 BOM, formula-injection safe) and two-step delete.
+
 ## Data flow
 | Form | Endpoint | Table / storage |
 |---|---|---|
 | Membership | `POST /api/submissions` `{type:"membership-application"}` | `membership` |
 | Contact | `POST /api/contact` (JSON) | `contact_messages` |
-| Graduation | `POST /api/graduation` (multipart, `receipt` file optional) | `graduation_registrations`, bucket `receipts` |
-| Exhibition – exhibitor | `POST /api/exhibition` (multipart, `mvp_demo` required) | `exhibition_registrations`, bucket `mvp-demos` |
+| Graduation | `POST /api/graduation` (JSON + receipt path/ticket, receipt required) | `graduation_registrations`, bucket `receipts` |
+| Exhibition – exhibitor | `POST /api/exhibition` (JSON + mvp path/ticket) | `exhibition_registrations`, bucket `mvp-demos` |
 | Exhibition – guest/company | `POST /api/submissions` `{type:"exhibition-guest-company"}` | `exhibition_guest_registrations` (created by scripts/005) |
 
 Uploads store the **object path** (not a public URL). `/api/admin/{graduation,exhibition}` convert paths to 1-hour signed URLs; the dashboard refetches to refresh them.
@@ -137,7 +158,7 @@ Uploads store the **object path** (not a public URL). `/api/admin/{graduation,ex
 - API routes validate with zod (v3) and trim strings before insert.
 
 ## Known open issues / TODO
-- No Privacy Policy / Terms pages yet (links were removed rather than left dead). Add them before collecting data at scale.
+- No Terms of Service page (Privacy Policy exists at /privacy).
 - No Facebook page link (removed `#` placeholder) — add to `site.socials` + social-links.tsx when one exists.
 - Bank name / account holder not shown (only the number was provided).
 - No rate limiting / captcha on public form endpoints (README mentions Upstash but it isn't implemented).
