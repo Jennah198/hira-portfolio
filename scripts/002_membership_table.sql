@@ -16,14 +16,5 @@ create table if not exists public.membership (
 
 alter table public.membership enable row level security;
 
--- Public applications: allow inserts without auth (anonymous or web client).
-drop policy if exists "membership_insert_public" on public.membership;
-create policy "membership_insert_public"
-  on public.membership for insert
-  with check (true);
-
--- Optionally restrict selects to admins only (adjust to your admins table/auth).
--- drop policy if exists "membership_select_admin" on public.membership;
--- create policy "membership_select_admin"
---   on public.membership for select
---   using (exists (select 1 from public.admins where id = auth.uid()));
+-- No public policies: the website inserts with the service-role key (RLS bypassed).
+-- Do not grant anon INSERT/SELECT — it would let anyone read or bypass the site's validation.

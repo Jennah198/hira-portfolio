@@ -7,11 +7,15 @@
 
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
 import { signedUrlOrOriginal } from "@/lib/supabase/storage-signed-url"
 
 const MVP_BUCKET = "mvp-demos"
 
 export async function GET() {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 

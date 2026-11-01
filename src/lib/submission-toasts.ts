@@ -1,8 +1,8 @@
 import { toast } from "@/hooks/use-toast"
 
-export function toastSubmissionSuccess() {
+export function toastSubmissionSuccess(message = "Your submission was successful!") {
   toast({
-    title: "Your submission was successful!",
+    title: message,
     variant: "success",
   })
 }

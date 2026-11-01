@@ -1,29 +1,10 @@
--- Optional: storage buckets + object policies. Run in Supabase SQL Editor once.
--- Creating buckets in Dashboard → Storage is usually easier than raw SQL.
+-- Storage buckets for uploads. Both are PRIVATE: the website uploads with the service-role key
+-- and the admin dashboard shows files through short-lived signed URLs.
+-- Do NOT add anon/public policies on storage.objects for these buckets — receipts contain
+-- personal payment data. (See 005_guest_table_and_security.sql, which removes old ones.)
 
 insert into storage.buckets (id, name, public)
 values
-  ('receipts', 'receipts', true),
-  ('mvp-demos', 'mvp-demos', true)
-on conflict (id) do nothing;
-
-drop policy if exists "receipts_insert_anon" on storage.objects;
-drop policy if exists "receipts_select_public" on storage.objects;
-drop policy if exists "mvp_demos_insert_anon" on storage.objects;
-drop policy if exists "mvp_demos_select_public" on storage.objects;
-
-create policy "receipts_insert_anon"
-  on storage.objects for insert to anon
-  with check (bucket_id = 'receipts');
-
-create policy "receipts_select_public"
-  on storage.objects for select to anon, authenticated
-  using (bucket_id = 'receipts');
-
-create policy "mvp_demos_insert_anon"
-  on storage.objects for insert to anon
-  with check (bucket_id = 'mvp-demos');
-
-create policy "mvp_demos_select_public"
-  on storage.objects for select to anon, authenticated
-  using (bucket_id = 'mvp-demos');
+  ('receipts', 'receipts', false),
+  ('mvp-demos', 'mvp-demos', false)
+on conflict (id) do update set public = false;

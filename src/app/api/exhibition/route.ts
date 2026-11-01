@@ -6,24 +6,25 @@
  *   project_explanation (text, NOT NULL), mvp_demo_url (text, NOT NULL),
  *   created_at (timestamptz, default: now())
  * Policy: exhibition_registrations_insert_public (INSERT for anon)
- * Storage: mvp-demos bucket (anon INSERT, anon SELECT) → mvp_demo_url
+ * Storage: private mvp-demos bucket (service role upload) → mvp_demo_url
  */
 
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
 import { uploadFormFile } from "@/lib/supabase/storage-upload"
+import { isBot } from "@/lib/honeypot"
 
 const exhibitionFacilitatorFields = z.object({
-  full_name: z.string().min(1),
+  full_name: z.string().min(1).max(300),
   email: z.preprocess(
     (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
-    z.string().email().optional(),
+    z.email().max(254).optional(),
   ),
-  phone_number: z.string().min(1),
-  program_of_study: z.string().min(1),
-  project_name: z.string().min(1),
-  project_explanation: z.string().min(1),
+  phone_number: z.string().min(1).max(60),
+  program_of_study: z.string().min(1).max(300),
+  project_name: z.string().min(1).max(300),
+  project_explanation: z.string().min(1).max(5000),
 })
 
 export async function POST(request: Request) {
@@ -33,6 +34,10 @@ export async function POST(request: Request) {
       formData = await request.formData()
     } catch {
       return NextResponse.json({ error: "Expected multipart/form-data" }, { status: 400 })
+    }
+
+    if (isBot(formData.get("website"))) {
+      return NextResponse.json({ ok: true })
     }
 
     const getText = (key: string) => {
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid exhibition registration", issues: parsed.error.flatten() },
+        { error: "Invalid exhibition registration", issues: z.flattenError(parsed.error) },
         { status: 400 },
       )
     }
@@ -92,18 +97,16 @@ export async function POST(request: Request) {
     if (error) {
       console.error("exhibition_registrations insert failed:", error.message)
       return NextResponse.json(
-        { error: "Could not save registration", details: error.message },
+        { error: "Could not save registration" },
         { status: 500 },
       )
     }
 
     return NextResponse.json({ ok: true })
   } catch (error) {
+    console.error("[" + new URL(request.url).pathname + "]", error)
     return NextResponse.json(
-      {
-        error: "Unexpected server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Unexpected server error" },
       { status: 500 },
     )
   }
