@@ -1,110 +1,159 @@
+/**
+ * JSON submissions:
+ *  - type "membership-application"   → public.membership
+ *  - type "exhibition-guest-company"  → public.exhibition_guest_registrations
+ *    (id uuid PK, company_name, owner_full_name, email?, phone_number, business_type,
+ *     area_of_interest, created_at) — see scripts/005_exhibition_guest_registrations.sql
+ * Optionally forwards every accepted submission to SUBMISSION_WEBHOOK_URL.
+ */
+
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
-import { createServiceRoleClient } from "@/lib/supabase/service"
+import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
+import { isBot } from "@/lib/honeypot"
 
-type SubmissionBody = {
-  type: string
-  payload: unknown
-}
+const MAX_BODY_BYTES = 50_000
 
-const membershipApplicationPayload = z.object({
-  fullName: z.string().min(1),
-  email: z.string().email(),
-  phone: z.string().min(1),
-  studentId: z.string().min(1),
-  program: z.string().min(1),
-  year: z.string().min(1),
-  motivation: z.string().min(1),
-  areaOfInterest: z.string().min(1),
+const text = (max: number) => z.string().trim().min(1).max(max)
+const email = z.string().trim().max(254).pipe(z.email())
+const optionalEmail = z
+  .string()
+  .trim()
+  .max(254)
+  .transform((v) => (v === "" ? undefined : v))
+  .pipe(z.email().optional())
+  .optional()
+
+const membershipPayload = z.object({
+  fullName: text(200),
+  email,
+  phone: text(40),
+  studentId: text(100),
+  program: text(200),
+  year: text(100),
+  motivation: text(5000),
+  areaOfInterest: text(100),
 })
 
-async function persistMembershipApplication(payload: z.infer<typeof membershipApplicationPayload>) {
-  const row = {
-    full_name: payload.fullName.trim(),
-    email: payload.email.trim(),
-    phone: payload.phone.trim(),
-    student_id: payload.studentId.trim(),
-    program: payload.program.trim(),
-    year: payload.year.trim(),
-    motivation: payload.motivation.trim(),
-    area_of_interest: payload.areaOfInterest.trim(),
-  }
+const guestCompanyPayload = z.object({
+  companyName: text(200),
+  ownerFullName: text(200),
+  email: optionalEmail,
+  phone: text(40),
+  businessType: text(200),
+  interestedArea: text(2000),
+})
 
-  const service = createServiceRoleClient()
-  const supabase = service ?? (await createClient())
+const submissionBody = z.object({
+  type: z.string().min(1).max(100),
+  payload: z.unknown(),
+  website: z.unknown().optional(),
+})
 
-  const { error } = await supabase.from("membership").insert(row)
+type Handler = (payload: unknown) => Promise<NextResponse | null>
 
-  if (error) {
-    return error
-  }
-  return null
+const handlers: Record<string, Handler> = {
+  "membership-application": async (payload) => {
+    const parsed = membershipPayload.safeParse(payload)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid membership application", issues: z.flattenError(parsed.error) },
+        { status: 400 },
+      )
+    }
+    const d = parsed.data
+    const supabase = await resolveSupabaseForRoute()
+    const { error } = await supabase.from("membership").insert({
+      full_name: d.fullName,
+      email: d.email,
+      phone: d.phone,
+      student_id: d.studentId,
+      program: d.program,
+      year: d.year,
+      motivation: d.motivation,
+      area_of_interest: d.areaOfInterest,
+    })
+    if (error) {
+      console.error("membership insert failed:", error.message)
+      return NextResponse.json({ error: "Could not save application" }, { status: 500 })
+    }
+    return null
+  },
+
+  "exhibition-guest-company": async (payload) => {
+    const parsed = guestCompanyPayload.safeParse(payload)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid guest registration", issues: z.flattenError(parsed.error) },
+        { status: 400 },
+      )
+    }
+    const d = parsed.data
+    const supabase = await resolveSupabaseForRoute()
+    const { error } = await supabase.from("exhibition_guest_registrations").insert({
+      company_name: d.companyName,
+      owner_full_name: d.ownerFullName,
+      email: d.email ?? null,
+      phone_number: d.phone,
+      business_type: d.businessType,
+      area_of_interest: d.interestedArea,
+    })
+    if (error) {
+      console.error("exhibition_guest_registrations insert failed:", error.message)
+      return NextResponse.json({ error: "Could not save registration" }, { status: 500 })
+    }
+    return null
+  },
 }
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as SubmissionBody
+    const raw = await request.text()
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Submission is too large" }, { status: 413 })
+    }
 
-    if (!body?.type || !body?.payload) {
+    let json: unknown
+    try {
+      json = JSON.parse(raw)
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+    }
+
+    const body = submissionBody.safeParse(json)
+    if (!body.success) {
       return NextResponse.json({ error: "Missing type or payload" }, { status: 400 })
     }
-
-    if (body.type === "membership-application") {
-      const parsed = membershipApplicationPayload.safeParse(body.payload)
-
-      if (!parsed.success) {
-        return NextResponse.json(
-          { error: "Invalid membership application payload", issues: parsed.error.flatten() },
-          { status: 400 },
-        )
-      }
-
-      const dbError = await persistMembershipApplication(parsed.data)
-
-      if (dbError) {
-        console.error("Supabase membership insert failed:", dbError.message)
-        return NextResponse.json(
-          {
-            error: "Could not save application",
-            details: dbError.message,
-          },
-          { status: 500 },
-        )
-      }
+    if (isBot(body.data.website)) {
+      return NextResponse.json({ ok: true })
     }
 
-    const webhookUrl = process.env.SUBMISSION_WEBHOOK_URL
-    const webhookToken = process.env.SUBMISSION_WEBHOOK_TOKEN
+    const handler = handlers[body.data.type]
+    if (!handler) {
+      return NextResponse.json({ error: "Unknown submission type" }, { status: 400 })
+    }
 
+    const failure = await handler(body.data.payload)
+    if (failure) return failure
+
+    const webhookUrl = process.env.SUBMISSION_WEBHOOK_URL
     if (webhookUrl) {
-      const webhookResponse = await fetch(webhookUrl, {
+      const webhookToken = process.env.SUBMISSION_WEBHOOK_TOKEN
+      // Saved already; a webhook outage must not fail the user's submission.
+      await fetch(webhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(webhookToken ? { Authorization: `Bearer ${webhookToken}` } : {}),
         },
-        body: JSON.stringify({
-          submittedAt: new Date().toISOString(),
-          ...body,
-        }),
-      })
-
-      if (!webhookResponse.ok) {
-        return NextResponse.json({ error: "Webhook rejected submission" }, { status: 502 })
-      }
-    } else if (body.type !== "membership-application") {
-      console.log("Submission received:", JSON.stringify(body))
+        body: JSON.stringify({ submittedAt: new Date().toISOString(), type: body.data.type, payload: body.data.payload }),
+        signal: AbortSignal.timeout(5000),
+      }).catch((err) => console.error("Submission webhook failed:", err))
     }
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Unexpected server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    console.error("submissions error:", error)
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })
   }
 }

@@ -1,0 +1,448 @@
+/**
+ * English — source dictionary. Every other locale must match this shape (enforced by the
+ * `Dictionary` type). Text wrapped in *asterisks* is rendered as an accent phrase.
+ */
+const en = {
+  meta: {
+    siteTitle: "Hira Muslim Students Association",
+    siteDescription:
+      "Hira Muslim Students Association empowers students through Islamic values, academic excellence, and community service in Addis Ababa, Ethiopia.",
+    homeTitle: "Hira Muslim Students Association — Knowledge, Service, Excellence",
+    aboutTitle: "About Us",
+    ourWorkTitle: "Our Work",
+    eventsTitle: "Events",
+    membershipTitle: "Membership",
+    contactTitle: "Contact Us",
+    graduationTitle: "Graduation Registration",
+    exhibitionTitle: "Exhibition Registration",
+  },
+  common: {
+    brand: "Hira Muslim Students Association",
+    brandShort: "Hira",
+    brandSub: "Muslim Students Association",
+    motto: "Knowledge · Service · Excellence",
+    back: "Back",
+    backToHome: "Back to Home",
+    backToEvents: "Back to Events",
+    backToTop: "Back to top",
+    home: "Home",
+    learnMore: "Learn more",
+    toggleTheme: "Toggle theme",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    language: "Language",
+    breadcrumb: "Breadcrumb",
+    optional: "optional",
+    submitting: "Submitting…",
+    sending: "Sending…",
+    successToast: "Thank you — your submission has been received.",
+    errorToast: "Something went wrong. Please try again.",
+    previous: "Previous slide",
+    next: "Next slide",
+    goToSlide: "Go to slide {n}",
+    copy: "Copy",
+    copied: "Copied",
+  },
+  nav: {
+    home: "Home",
+    about: "About Us",
+    ourWork: "Our Work",
+    events: "Events",
+    allEvents: "All Events",
+    graduation: "Graduation Ceremony",
+    exhibition: "Annual Exhibition",
+    membership: "Membership",
+    contact: "Contact",
+    becomeMember: "Become a Member",
+  },
+  topbar: {
+    location: "Addis Ababa, Ethiopia",
+  },
+  hero: {
+    eyebrow: "Knowledge · Service · Excellence",
+    titleLine1: "Illuminating Minds,",
+    titleLine2: "Empowering Leaders",
+    subtitle:
+      "Hira Muslim Students Association cultivates excellence through Islamic values, academic achievement, and transformative community service.",
+    primaryCta: "Become a Member",
+    secondaryCta: "Explore Our Work",
+    cardTitle: "Graduation Ceremony",
+    cardText: "Honoring our graduates every year. Register for the next ceremony.",
+    slides: ["Graduation ceremony", "Graduation ceremony", "Study circle", "Annual exhibition"],
+  },
+  pillars: [
+    { title: "Faith", text: "Strengthening our connection with Allah" },
+    { title: "Knowledge", text: "Pursuing excellence in learning" },
+    { title: "Service", text: "Giving back to our community" },
+    { title: "Excellence", text: "Striving for the highest standards" },
+  ],
+  home: {
+    about: {
+      eyebrow: "About Us",
+      title: "A community rooted in faith and *devoted to knowledge*",
+      body: "Hira Muslim Students Association is a vibrant community dedicated to empowering students through education, service, and Islamic values. Our name, derived from the Cave of Hira where revelation began, symbolizes enlightenment and the pursuit of knowledge.",
+      cta: "More about us",
+    },
+    impact: {
+      eyebrow: "Our Impact",
+      title: "Years of service, *measured in lives*",
+      intro: "Every graduate honored and every project showcased reflects the commitment of our members and community.",
+    },
+    programmes: {
+      eyebrow: "Our Work",
+      title: "Programs and *initiatives*",
+      intro:
+        "We engage in diverse initiatives that strengthen our community, serve those in need, and create lasting positive impact.",
+      cta: "View all programs",
+    },
+    events: {
+      eyebrow: "Flagship Events",
+      title: "Moments that bring our *community together*",
+      intro:
+        "Join us for transformative events that bring our community together in celebration of achievement and knowledge.",
+    },
+    steps: {
+      eyebrow: "Get Involved",
+      title: "Three steps to *join our community*",
+      intro: "Membership is open to all students who share our values.",
+      items: [
+        {
+          title: "Apply",
+          text: "Complete the membership application with your details and tell us why you would like to join Hira.",
+        },
+        {
+          title: "Participate",
+          text: "Attend study circles, workshops, and community service initiatives, and grow alongside fellow students.",
+        },
+        {
+          title: "Lead",
+          text: "Lead projects, organize events, and represent Hira at schools and community functions.",
+        },
+      ],
+    },
+    cta: {
+      title: "Ready to *join our community*?",
+      text: "Become part of a growing network of students dedicated to knowledge, service, and excellence.",
+      button: "Apply for Membership",
+      secondary: "Contact Us",
+    },
+  },
+  stats: {
+    graduates: "Graduates honored",
+    projects: "Projects showcased",
+    years: "Years of excellence",
+    programmes: "Core programs",
+  },
+  programmes: [
+    {
+      title: "Charity & Community Service",
+      text: "Supporting those in need through fundraising, donations, and community outreach programs that make a real difference.",
+    },
+    {
+      title: "Graduation Ceremony",
+      text: "Celebrating academic excellence at our annual graduation ceremony, honoring students who have successfully completed their programs.",
+    },
+    {
+      title: "Educational Study Circles",
+      text: "Weekly study groups exploring Islamic knowledge, academic excellence, and personal development through collaborative learning.",
+    },
+    {
+      title: "Social Development Programs",
+      text: "Building brotherhood and sisterhood through mentorship, leadership training, and community-building activities.",
+    },
+    {
+      title: "Leadership Workshops",
+      text: "Empowering students with skills in public speaking, project management, and ethical leadership rooted in Islamic values.",
+    },
+    {
+      title: "Annual Exhibition",
+      text: "Showcasing the creativity and innovation of our students through artwork, design projects, research posters, and interactive demonstrations.",
+    },
+  ],
+  about: {
+    header: {
+      eyebrow: "Who We Are",
+      title: "About *Hira*",
+      subtitle:
+        "A student association empowering young Muslims through education, service, and Islamic values.",
+    },
+    whoWeAre: {
+      eyebrow: "Our Story",
+      title: "A community of *learners and servants*",
+      body: "Hira Muslim Students Association is a vibrant community dedicated to empowering students through education, service, and Islamic values. We bring students together to learn, to serve, and to grow in faith and character.",
+    },
+    name: {
+      title: "The meaning of our name",
+      body: "Our name is derived from the Cave of Hira, where revelation began. It symbolizes enlightenment and the pursuit of knowledge — the founding spirit of our association.",
+    },
+    vision: {
+      title: "Our Vision",
+      body: "A community of students who excel academically while staying rooted in faith and committed to serving humanity.",
+    },
+    mission: {
+      title: "Our Mission",
+      body: "To create meaningful opportunities for learning, personal growth, and positive societal impact through Islamic principles.",
+    },
+    values: {
+      eyebrow: "Core Values",
+      title: "The principles that *guide us*",
+    },
+    commitments: {
+      eyebrow: "Our Commitments",
+      title: "What we *stand for*",
+      intro: "Hira Muslim Students Association welcomes all students who share our commitment to:",
+      items: [
+        "Pursuing academic excellence with Islamic principles",
+        "Serving the community with dedication and compassion",
+        "Growing spiritually and intellectually",
+        "Building positive relationships and fostering unity",
+      ],
+    },
+  },
+  ourWork: {
+    header: {
+      eyebrow: "Our Work",
+      title: "Programs and *initiatives*",
+      subtitle:
+        "We engage in diverse initiatives that strengthen our community, serve those in need, and create lasting positive impact.",
+    },
+    approach: {
+      eyebrow: "Our Approach",
+      title: "Faith, knowledge, and service — *in practice*",
+      intro:
+        "Each of our programs is designed to develop the whole student: spiritually, academically, and socially.",
+    },
+  },
+  events: {
+    header: {
+      eyebrow: "Events",
+      title: "Our *signature events*",
+      subtitle:
+        "Discover our signature events that bring together students, celebrate achievements, and showcase the impact of our community.",
+    },
+    when: "When",
+    where: "Where",
+    graduation: {
+      badge: "Annual Celebration",
+      title: "Graduation Ceremony",
+      summary:
+        "Our annual graduation ceremony celebrates the remarkable achievements of our graduating members, honoring excellence in academics, leadership, and service to the community.",
+      body: "Our annual graduation ceremony is a momentous occasion where we honor the achievements of our graduating members. This prestigious event celebrates not only academic success but also the personal growth, leadership, and community contributions of our students.",
+      whenValue: "Held annually at the end of the academic year",
+      whereValue: "Different well-known halls",
+      who: "Who Attends",
+      whoValue: "Graduates, families, scholars, and association members",
+      highlightsTitle: "Event Highlights",
+      highlights: [
+        "Formal graduation procession and certificate presentation",
+        "Inspirational speeches from distinguished guests",
+        "Recognition of outstanding achievements and contributions",
+        "Reception and networking opportunities",
+      ],
+      cta: "Register for the Ceremony",
+      details: "Event details",
+    },
+    exhibition: {
+      badge: "Annual Showcase",
+      title: "Annual Exhibition",
+      summary:
+        "The Annual Exhibition showcases the creativity, innovation, and scholarly excellence of our students across technology, arts, social sciences, and more.",
+      body: "Our Annual Exhibition is a vibrant showcase of student talent, innovation, and creativity. It provides a platform for members to present their academic projects, research findings, and creative endeavors to the wider university community and beyond.",
+      whenValue: "Summer break, typically in August",
+      whereValue: "Awolia Hall",
+      who: "Open To",
+      whoValue: "Students, faculty, industry partners, and the public",
+      featuresTitle: "Exhibition Features",
+      features: [
+        "Student research presentations and academic projects",
+        "Creative works and innovative solutions showcase",
+        "Interactive workshops and skill-building sessions",
+        "Networking with industry professionals and alumni",
+      ],
+      cta: "Submit Your Project",
+      details: "Event details",
+    },
+    impact: {
+      eyebrow: "Impact Summary",
+      title: "Our events *in numbers*",
+    },
+  },
+  membership: {
+    header: {
+      eyebrow: "Membership",
+      title: "Join *Hira*",
+      subtitle:
+        "Become part of a community dedicated to knowledge, service, and excellence. Membership is open to all students who share our values.",
+    },
+    benefits: {
+      title: "Membership Benefits",
+      items: [
+        "Access to exclusive educational workshops, seminars, and study circles",
+        "Networking opportunities with alumni, professionals, and like-minded students",
+        "Leadership development programs",
+        "Participation in community service initiatives",
+        "Spiritual growth through guided Islamic learning",
+        "Academic support, career guidance, and mentorship",
+        "Priority registration for events",
+        "Certificate of membership and graduation recognition",
+        "Voting rights in association decisions",
+      ],
+    },
+    eligibility: {
+      title: "Who Can Join?",
+    },
+    responsibilities: {
+      title: "Opportunities & Responsibilities",
+      body: "Members have the opportunity to lead projects, organize events, participate in charitable initiatives, and represent Hira at schools and community functions. We expect active participation, commitment to our values, and contribution to our collective mission of knowledge and service.",
+    },
+    requirements: {
+      title: "Requirements",
+      items: [
+        "Current enrollment at a school or university",
+        "Commitment to association values and activities",
+        "Active participation in at least two events per semester",
+        "Payment of the annual membership fee (if applicable)",
+      ],
+    },
+    payment: {
+      title: "Membership Fee Payment",
+      text: "Where a membership fee applies, please pay it to the association's bank account below and keep your receipt.",
+    },
+    form: {
+      title: "Application Form",
+      intro: "All fields marked with * are required.",
+      fullName: "Full Name",
+      fullNamePh: "Enter your full name",
+      email: "Email Address",
+      emailPh: "your.email@university.edu",
+      phone: "Phone Number",
+      phonePh: "+251 91 234 5678",
+      studentId: "Student ID",
+      studentIdPh: "Enter your student ID",
+      program: "Program of Study",
+      programPh: "e.g., Computer Science, High School",
+      year: "Year of Study",
+      yearPh: "e.g., 2nd Year or Grade 11",
+      interest: "Area of Interest",
+      interestPh: "Select your area of interest",
+      interests: {
+        education: "Educational Programs",
+        charity: "Charity & Community Service",
+        leadership: "Leadership Development",
+        social: "Social & Spiritual Events",
+        spiritual: "Spiritual Growth",
+        environmental: "Environmental Initiatives",
+      },
+      motivation: "Why do you want to join Hira?",
+      motivationPh: "Share your motivation and what you hope to contribute…",
+      submit: "Submit Application",
+      consent: "Your details will be used only to process your application.",
+      error: "Could not submit your application.",
+    },
+  },
+  contact: {
+    header: {
+      eyebrow: "Contact",
+      title: "Get *in touch*",
+      subtitle: "Have questions or want to learn more about Hira? We would love to hear from you.",
+    },
+    info: {
+      title: "Contact Information",
+      intro:
+        "Reach out to us through any of the following channels. Our team is here to answer your questions and help you get involved.",
+    },
+    email: "Email",
+    phone: "Phone",
+    location: "Office Location",
+    locationLine1: "Lubaba Mosque",
+    locationLine2: "Addis Ababa, Ethiopia",
+    hours: "Monday – Friday, 2:00 PM – 6:00 PM",
+    replyTime: "We reply within 24 hours",
+    follow: "Follow Us",
+    form: {
+      title: "Send Us a Message",
+      name: "Name",
+      namePh: "Your full name",
+      email: "Email",
+      emailPh: "your.email@example.com",
+      subject: "Subject",
+      subjectPh: "What is this regarding?",
+      message: "Message",
+      messagePh: "Write your message here…",
+      submit: "Send Message",
+      error: "Unable to send your message.",
+    },
+  },
+  graduationForm: {
+    header: {
+      eyebrow: "Graduation Ceremony",
+      title: "Graduation *Registration*",
+      subtitle: "Register to take part in our annual graduation ceremony.",
+    },
+    paymentTitle: "Payment information",
+    accountLabel: "Payment account number",
+    accountNote: "Copy this account number and use it when sending payment.",
+    fullName: "Full Name",
+    schoolName: "School Name",
+    phone: "Phone Number",
+    telegram: "Telegram Username",
+    fayda: "ID Card (Fayda)",
+    email: "Email",
+    address: "Address",
+    receipt: "Payment receipt (screenshot or PDF)",
+    receiptHelp: "Max 10 MB. Images or PDF.",
+    help: "Need additional information? Call:",
+    submit: "Submit Registration",
+    error: "Could not submit your registration.",
+  },
+  exhibitionForm: {
+    header: {
+      eyebrow: "Annual Exhibition",
+      title: "Exhibition *Registration*",
+      subtitle: "Present your project or join us as a guest at our Annual Exhibition.",
+    },
+    chooseType: "Registration type",
+    facilitatorTab: "Program Facilitator / Exhibitor",
+    guestTab: "Guest / Company Owner",
+    fullName: "Full Name",
+    email: "Email",
+    phone: "Phone Number",
+    program: "Program of Study",
+    projectName: "Name of the Project",
+    projectExplanation: "Short Project Explanation",
+    mvp: "Upload MVP / Demo",
+    mvpHelp: "Max 30 MB. Images, PDF, video, or ZIP.",
+    mvpMissing: "Please upload your MVP or demo file.",
+    companyName: "Company Name",
+    ownerName: "Owner Full Name",
+    businessType: "Business Type",
+    interest: "Area of Interest",
+    submit: "Submit Registration",
+    error: "Could not submit your registration.",
+  },
+  footer: {
+    about:
+      "Empowering students through Islamic values, academic excellence, and community service. We are dedicated to building knowledge, fostering leadership, and creating positive change in our community.",
+    association: "The Association",
+    getInvolved: "Get Involved",
+    contactUs: "Contact Us",
+    registerGraduation: "Graduation Registration",
+    submitProject: "Exhibition Registration",
+    connect: "Connect With Us",
+    rights: "© {year} Hira Muslim Students Association. All rights reserved.",
+  },
+  errorPage: {
+    eyebrow: "Error",
+    title: "Something *went wrong*",
+    text: "An unexpected error occurred. Please try again, or return to the home page.",
+    retry: "Try again",
+  },
+  notFound: {
+    eyebrow: "Error 404",
+    title: "Page *not found*",
+    text: "The page you are looking for does not exist or has been moved.",
+  },
+}
+
+export type Dictionary = typeof en
+export default en

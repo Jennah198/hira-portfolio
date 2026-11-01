@@ -1,245 +1,146 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Award, BookOpen, Calendar, Users, MapPin } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
+import { Award, BookOpen, Calendar, CheckCircle2, MapPin, Users } from "lucide-react"
+import { PageHeader } from "@/components/shared/page-header"
+import { SectionHeading } from "@/components/shared/section-heading"
+import { ArrowForward } from "@/components/shared/accent"
+import { EventGallery } from "@/components/marketing/event-gallery"
+import { ImpactStats } from "@/components/marketing/stats"
+import { CtaBand } from "@/components/marketing/cta-band"
+import { Button } from "@/components/ui/button"
+import { getI18n } from "@/i18n/server"
+import type { Dictionary } from "@/i18n/dictionaries"
+import { cn } from "@/lib/utils"
 
-export const metadata: Metadata = {
-  title: "Events - Hira Muslim Students Association",
-  description:
-    "Discover our signature events including the annual Graduation Ceremony and Exhibition that celebrate student achievements and showcase community impact.",
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.meta.eventsTitle, description: t.events.header.subtitle }
 }
 
-export default function EventsPage() {
+type EventBlockProps = {
+  id: string
+  index: string
+  icon: typeof Award
+  images: string[]
+  data: Dictionary["events"]["graduation"] | Dictionary["events"]["exhibition"]
+  listTitle: string
+  list: string[]
+  registerHref: string
+  reverse?: boolean
+  t: Dictionary
+}
+
+function EventBlock({ id, index, icon: Icon, images, data, listTitle, list, registerHref, reverse, t }: EventBlockProps) {
   return (
-    <main>
-        <section className="bg-gradient-to-b from-primary/5 to-background py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">Our Events</h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Discover our signature events that bring together students, celebrate achievements, and showcase the
-                impact of our community.
-              </p>
+    <section id={id} className="scroll-mt-28 py-20 md:py-28">
+      <div className="mx-auto grid max-w-7xl items-start gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+        <div className={cn(reverse && "lg:order-2")}>
+          <p data-reveal className="eyebrow mb-5">
+            <span className="tabular-nums opacity-80">{index}</span>
+            {data.badge}
+          </p>
+          <h2 data-reveal className="flex items-center gap-3 text-3xl font-semibold tracking-tight md:text-5xl">
+            <Icon aria-hidden className="size-8 shrink-0 text-gold" />
+            {data.title}
+          </h2>
+          <p data-reveal className="mt-6 text-lg leading-relaxed text-muted-foreground">
+            {data.body}
+          </p>
+
+          <dl data-reveal className="mt-8 grid gap-4 sm:grid-cols-3">
+            {[
+              { icon: Calendar, label: t.events.when, value: data.whenValue },
+              { icon: MapPin, label: t.events.where, value: data.whereValue },
+              { icon: Users, label: data.who, value: data.whoValue },
+            ].map((row) => (
+              <div key={row.label} className="glass rounded-2xl border p-4">
+                <row.icon aria-hidden className="size-5 text-gold" />
+                <dt className="mt-3 text-sm font-semibold">{row.label}</dt>
+                <dd className="mt-1 text-sm text-muted-foreground">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <Button asChild size="lg" className="mt-10" data-reveal>
+            <Link href={registerHref}>
+              {data.cta}
+              <ArrowForward />
+            </Link>
+          </Button>
+        </div>
+
+        <div className={cn("space-y-6", reverse && "lg:order-1")}>
+          <div data-reveal>
+            <div data-tilt={reverse ? -1 : 1} className="glass overflow-hidden rounded-3xl border p-2">
+              <EventGallery images={images} alt={data.title} />
             </div>
           </div>
-        </section>
-
-        <section id="graduation" className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="order-2 md:order-1">
-                <div className="inline-flex items-center gap-2 bg-accent/20 text-accent-foreground px-4 py-2 rounded-full text-sm font-medium mb-4">
-                  <Award size={16} />
-                  <span>Annual Celebration</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-balance">
-                  Graduation Ceremony
-                </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  Our annual graduation ceremony is a momentous occasion where we honor the achievements of our
-                  graduating members. This prestigious event celebrates not only academic success but also the personal
-                  growth, leadership, and community contributions of our students.
-                </p>
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">When</h4>
-                      <p className="text-sm text-muted-foreground">Held annually at the end of the academic year</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">Where</h4>
-                      <p className="text-sm text-muted-foreground">Different well known halls</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Users className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">Who Attends</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Graduates, families, scholars, and association members
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Button asChild size="lg" aria-label="Register for graduation event">
-                  <Link href="/events/graduation/register">Register for Next Event</Link>
-                </Button>
-              </div>
-              <div className="order-1 md:order-2">
-                <Card className="border-border overflow-hidden">
-                  <div className="relative h-64 bg-gradient-to-br from-accent to-accent/60">
-                    <img
-                      src="/images/gradwithredgawn.png"
-                      alt="Graduation ceremony"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-3 text-card-foreground">Event Highlights</h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent mt-1">•</span>
-                        <span>Formal graduation procession and certificate presentation</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent mt-1">•</span>
-                        <span>Inspirational speeches from distinguished guests</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent mt-1">•</span>
-                        <span>Recognition of outstanding achievements and contributions</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent mt-1">•</span>
-                        <span>Reception and networking opportunities</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[2024, 2023, 2022, 2021].map((year) => (
-                <Card key={year} className="border-border overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-40 bg-muted">
-                    <img
-                      src={`/graduation-.jpg?height=200&width=300&query=graduation+${year}`}
-                      alt={`Graduation ${year}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-foreground">Class of {year}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">View gallery</p>
-                  </CardContent>
-                </Card>
+          <div data-reveal className="glass rounded-3xl border p-7">
+            <h3 className="text-lg font-semibold">{listTitle}</h3>
+            <ul className="mt-4 space-y-3">
+              {list.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0 text-gold" />
+                  {item}
+                </li>
               ))}
-            </div> */}
+            </ul>
           </div>
-        </section>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-        <section id="exhibition" className="py-16 md:py-24 bg-muted/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <Card className="border-border overflow-hidden">
-                  <div className="relative h-64 bg-gradient-to-br from-primary/20 to-primary/10">
-                    <img
-                      src="/images/exhibitionStands.png"
-                      alt="Annual exhibition"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-3 text-card-foreground">Exhibition Features</h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary mt-1">•</span>
-                        <span>Student research presentations and academic projects</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary mt-1">•</span>
-                        <span>Creative works and innovative solutions showcase</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary mt-1">•</span>
-                        <span>Interactive workshops and skill-building sessions</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-primary mt-1">•</span>
-                        <span>Networking with industry professionals and alumni</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-              <div>
-                <div className="inline-flex items-center gap-2 bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
-                  <BookOpen size={16} />
-                  <span>Annual Showcase</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-balance">Annual Exhibition</h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  Our Annual Exhibition is a vibrant showcase of student talent, innovation, and creativity. This event
-                  provides a platform for members to present their academic projects, research findings, and creative
-                  endeavors to the wider university community and beyond.
-                </p>
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">When</h4>
-                      <p className="text-sm text-muted-foreground">Summer Break, typically in August</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">Where</h4>
-                      <p className="text-sm text-muted-foreground">Awolia Hall</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Users className="text-primary mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">Open To</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Students, faculty, industry partners, and the public
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Button asChild size="lg" aria-label="Register for exhibition">
-                  <Link href="/events/exhibition/register">Submit Your Project</Link>
-                </Button>
-              </div>
-            </div>
+export default async function EventsPage() {
+  const { t } = await getI18n()
 
-            {/* <div className="mt-12 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[2024, 2023, 2022, 2021].map((year) => (
-                <Card key={year} className="border-border overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-40 bg-muted">
-                    <img
-                      src={`/exhibition-.jpg?height=200&width=300&query=exhibition+${year}`}
-                      alt={`Exhibition ${year}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-foreground">{year} Exhibition</h4>
-                    <p className="text-sm text-muted-foreground mt-1">View projects</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div> */}
-          </div>
-        </section>
+  return (
+    <>
+      <PageHeader
+        image="/images/graduationPoster.webp"
+        eyebrow={t.events.header.eyebrow}
+        title={t.events.header.title}
+        subtitle={t.events.header.subtitle}
+        backHref="/"
+        backLabel={t.common.backToHome}
+        breadcrumbLabel={t.common.breadcrumb}
+        crumbs={[{ label: t.common.home, href: "/" }, { label: t.nav.events }]}
+      />
 
-        <section className="py-16 md:py-24">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-balance">Impact Summary</h2>
-            <div className="grid sm:grid-cols-3 gap-8 mt-12">
-              <div>
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">500+</div>
-                <div className="text-muted-foreground">Graduates</div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">15+</div>
-                <div className="text-muted-foreground">Projects Showcased</div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">6+</div>
-                <div className="text-muted-foreground">Years of Excellence</div>
-              </div>
-            </div>
-          </div>
-        </section>
-    </main>
+      <EventBlock
+        id="graduation"
+        index="01"
+        icon={Award}
+        images={["/images/graduationSisters.webp", "/images/gradwithredgawn.webp", "/images/certificates.webp", "/images/graduationPoster.webp"]}
+        data={t.events.graduation}
+        listTitle={t.events.graduation.highlightsTitle}
+        list={t.events.graduation.highlights}
+        registerHref="/events/graduation/register"
+        t={t}
+      />
+
+      <EventBlock
+        id="exhibition"
+        index="02"
+        icon={BookOpen}
+        images={["/images/exhibitionStands.webp", "/images/swExhibition.webp", "/images/mechExhibition.webp"]}
+        data={t.events.exhibition}
+        listTitle={t.events.exhibition.featuresTitle}
+        list={t.events.exhibition.features}
+        registerHref="/events/exhibition/register"
+        reverse
+        t={t}
+      />
+
+      <section className="py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading index="03" eyebrow={t.events.impact.eyebrow} title={t.events.impact.title} />
+          <ImpactStats />
+        </div>
+      </section>
+
+      <CtaBand t={t} />
+    </>
   )
 }
