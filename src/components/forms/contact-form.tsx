@@ -8,8 +8,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Field } from "@/components/forms/field"
 import { Honeypot } from "@/components/forms/honeypot"
+import { PrivacyNote } from "@/components/forms/privacy-note"
+import { Turnstile, type TurnstileHandle } from "@/components/forms/turnstile"
+import { apiErrorMessage } from "@/components/forms/submit-helpers"
 import { useI18n } from "@/i18n/client"
-import { getSubmissionErrorMessage, toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
+import { toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
 
 const EMPTY = { name: "", email: "", subject: "", message: "" }
 
@@ -17,6 +20,7 @@ export function ContactForm() {
   const { t } = useI18n()
   const f = t.contact.form
   const hpRef = useRef<HTMLInputElement>(null)
+  const tsRef = useRef<TurnstileHandle>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(EMPTY)
 
@@ -27,14 +31,15 @@ export function ContactForm() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      const turnstileToken = await tsRef.current?.getToken()
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, website: hpRef.current?.value ?? "" }),
+        body: JSON.stringify({ ...formData, website: hpRef.current?.value ?? "", turnstileToken }),
       })
       const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        toastSubmissionError(getSubmissionErrorMessage(payload, f.error))
+        toastSubmissionError(apiErrorMessage(payload, f.error, t))
         return
       }
       setFormData(EMPTY)
@@ -42,6 +47,7 @@ export function ContactForm() {
     } catch {
       toastSubmissionError(t.common.errorToast)
     } finally {
+      tsRef.current?.reset()
       setIsSubmitting(false)
     }
   }
@@ -63,6 +69,7 @@ export function ContactForm() {
       <Field id="message" label={f.message} required>
         <Textarea id="message" name="message" value={formData.message} onChange={handleChange} required placeholder={f.messagePh} rows={6} />
       </Field>
+      <Turnstile ref={tsRef} />
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           t.common.sending
@@ -73,6 +80,7 @@ export function ContactForm() {
           </>
         )}
       </Button>
+      <PrivacyNote />
     </form>
   )
 }
