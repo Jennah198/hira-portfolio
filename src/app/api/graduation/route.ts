@@ -4,114 +4,90 @@
  *   school_name (text, NOT NULL), phone_number (text, NOT NULL),
  *   telegram_username (text, NOT NULL), id_card_number (text, optional),
  *   email (text, optional), address (text, NOT NULL),
- *   payment_receipt_url (text, NOT NULL — receipt upload is required), created_at (timestamptz, default: now())
- * Policy: graduation_registrations_insert_public (INSERT for anon)
- * Storage: private receipts bucket (service role upload) → payment_receipt_url (required)
+ *   payment_receipt_url (text, NOT NULL — storage path in the private "receipts" bucket), created_at
+ * The receipt is uploaded by the browser directly to Supabase (see /api/uploads); this route
+ * receives JSON with the object path and a signed ticket.
  */
 
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
-import { uploadFormFile } from "@/lib/supabase/storage-upload"
 import { isBot } from "@/lib/honeypot"
+import { confirmUploaded, verifyTicket } from "@/lib/uploads"
+import { notifySubmission } from "@/lib/notify"
 
-const graduationFields = z.object({
-  full_name: z.string().min(1).max(300),
-  school_name: z.string().min(1).max(300),
-  phone_number: z.string().min(1).max(60),
-  telegram_username: z.string().min(1).max(60),
-  id_card_number: z.string().max(60).optional(),
-  email: z.preprocess(
-    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
-    z.email().max(254).optional(),
-  ),
-  address: z.string().min(1).max(300),
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((v) => (v ? v : null))
+
+const graduationBody = z.object({
+  full_name: z.string().trim().min(1).max(300),
+  school_name: z.string().trim().min(1).max(300),
+  phone_number: z.string().trim().min(1).max(60),
+  telegram_username: z.string().trim().min(1).max(60),
+  id_card_number: optionalText(60),
+  email: z
+    .string()
+    .trim()
+    .max(254)
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .pipe(z.email().optional()),
+  address: z.string().trim().min(1).max(300),
+  receipt_path: z.string().max(200),
+  receipt_ticket: z.string().max(200),
+  website: z.string().optional(),
 })
-
-function normalizeTelegram(raw: string): string {
-  return raw.trim().replace(/^@+/, "")
-}
 
 export async function POST(request: Request) {
   try {
-    let formData: FormData
-    try {
-      formData = await request.formData()
-    } catch {
-      return NextResponse.json({ error: "Expected multipart/form-data" }, { status: 400 })
-    }
-
-    if (isBot(formData.get("website"))) {
+    const json = await request.json().catch(() => null)
+    if (json && isBot((json as { website?: unknown }).website)) {
       return NextResponse.json({ ok: true })
     }
 
-    const getText = (key: string) => {
-      const v = formData.get(key)
-      return typeof v === "string" ? v.trim() : ""
-    }
-
-    const parsed = graduationFields.safeParse({
-      full_name: getText("full_name"),
-      school_name: getText("school_name"),
-      phone_number: getText("phone_number"),
-      telegram_username: getText("telegram_username"),
-      id_card_number: getText("id_card_number") || undefined,
-      email: getText("email") || undefined,
-      address: getText("address"),
-    })
-
+    const parsed = graduationBody.safeParse(json)
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid graduation registration", issues: z.flattenError(parsed.error) },
         { status: 400 },
       )
     }
+    const d = parsed.data
 
-    const receiptEntry = formData.get("receipt")
-    if (!(receiptEntry instanceof File) || receiptEntry.size === 0) {
+    if (!verifyTicket("receipt", d.receipt_path, d.receipt_ticket)) {
       return NextResponse.json({ error: "Payment receipt is required" }, { status: 400 })
     }
 
     const supabase = await resolveSupabaseForRoute()
-    const up = await uploadFormFile({
-      supabase,
-      bucket: "receipts",
-      file: receiptEntry,
-      folder: "graduation",
-      kind: "receipt",
-    })
-    if ("error" in up) {
-      return NextResponse.json({ error: "Receipt upload failed", details: up.error }, { status: 400 })
+    if (!(await confirmUploaded(supabase, "receipt", d.receipt_path))) {
+      return NextResponse.json({ error: "Payment receipt upload was not found. Please upload it again." }, { status: 400 })
     }
-    const paymentReceiptUrl = up.path
-
-    const emailVal = parsed.data.email
 
     const { error } = await supabase.from("graduation_registrations").insert({
-      full_name: parsed.data.full_name.trim(),
-      school_name: parsed.data.school_name.trim(),
-      phone_number: parsed.data.phone_number.trim(),
-      telegram_username: normalizeTelegram(parsed.data.telegram_username),
-      id_card_number: parsed.data.id_card_number?.trim() || null,
-      email: emailVal?.trim() ? emailVal.trim() : null,
-      address: parsed.data.address.trim(),
-      payment_receipt_url: paymentReceiptUrl,
+      full_name: d.full_name,
+      school_name: d.school_name,
+      phone_number: d.phone_number,
+      telegram_username: d.telegram_username.replace(/^@+/, ""),
+      id_card_number: d.id_card_number,
+      email: d.email ?? null,
+      address: d.address,
+      payment_receipt_url: d.receipt_path,
     })
 
     if (error) {
       console.error("graduation_registrations insert failed:", error.message)
-      return NextResponse.json(
-        { error: "Could not save registration" },
-        { status: 500 },
-      )
+      return NextResponse.json({ error: "Could not save registration" }, { status: 500 })
     }
 
+    notifySubmission("graduation registration", { Name: d.full_name, School: d.school_name, Phone: d.phone_number })
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error("[" + new URL(request.url).pathname + "]", error)
-    return NextResponse.json(
-      { error: "Unexpected server error" },
-      { status: 500 },
-    )
+    console.error("[/api/graduation]", error)
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })
   }
 }

@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Field } from "@/components/forms/field"
 import { Honeypot } from "@/components/forms/honeypot"
+import { PrivacyNote } from "@/components/forms/privacy-note"
+import { Turnstile, type TurnstileHandle } from "@/components/forms/turnstile"
+import { apiErrorMessage, uploadDirect } from "@/components/forms/submit-helpers"
 import { ArrowForward } from "@/components/shared/accent"
 import { useI18n } from "@/i18n/client"
 import { cn } from "@/lib/utils"
-import { getSubmissionErrorMessage, toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
+import { toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
 
 type Mode = "facilitator" | "guest-company"
 
@@ -23,6 +26,8 @@ export function ExhibitionForm() {
   const f = t.exhibitionForm
   const mvpFileRef = useRef<HTMLInputElement>(null)
   const hpRef = useRef<HTMLInputElement>(null)
+  const tsRef = useRef<TurnstileHandle>(null)
+  const [status, setStatus] = useState<string | null>(null)
   const [mvpResetKey, setMvpResetKey] = useState(0)
   const [mode, setMode] = useState<Mode>("facilitator")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,26 +43,40 @@ export function ExhibitionForm() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      const turnstileToken = await tsRef.current?.getToken()
+
       if (mode === "facilitator") {
         const demo = mvpFileRef.current?.files?.[0]
         if (!demo || demo.size === 0) {
           toastSubmissionError(f.mvpMissing)
           return
         }
-        const fd = new FormData()
-        fd.append("full_name", facilitator.fullName.trim())
-        fd.append("phone_number", facilitator.phone.trim())
-        fd.append("program_of_study", facilitator.programOfStudy.trim())
-        fd.append("project_name", facilitator.projectName.trim())
-        fd.append("project_explanation", facilitator.projectExplanation.trim())
-        if (facilitator.email.trim()) fd.append("email", facilitator.email.trim())
-        fd.append("mvp_demo", demo)
-        fd.append("website", hpRef.current?.value ?? "")
+        setStatus(t.common.uploading)
+        const upload = await uploadDirect("mvp", demo, 30, turnstileToken, t)
+        if ("error" in upload) {
+          toastSubmissionError(upload.error)
+          return
+        }
 
-        const res = await fetch("/api/exhibition", { method: "POST", body: fd })
+        setStatus(t.common.submitting)
+        const res = await fetch("/api/exhibition", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: facilitator.fullName,
+            email: facilitator.email,
+            phone_number: facilitator.phone,
+            program_of_study: facilitator.programOfStudy,
+            project_name: facilitator.projectName,
+            project_explanation: facilitator.projectExplanation,
+            mvp_path: upload.path,
+            mvp_ticket: upload.ticket,
+            website: hpRef.current?.value ?? "",
+          }),
+        })
         const payload = await res.json().catch(() => null)
         if (!res.ok) {
-          toastSubmissionError(getSubmissionErrorMessage(payload, f.error))
+          toastSubmissionError(apiErrorMessage(payload, f.error, t))
           return
         }
         toastSubmissionSuccess(t.common.successToast)
@@ -69,11 +88,16 @@ export function ExhibitionForm() {
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "exhibition-guest-company", payload: company, website: hpRef.current?.value ?? "" }),
+        body: JSON.stringify({
+          type: "exhibition-guest-company",
+          payload: company,
+          website: hpRef.current?.value ?? "",
+          turnstileToken,
+        }),
       })
       const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        toastSubmissionError(getSubmissionErrorMessage(payload, f.error))
+        toastSubmissionError(apiErrorMessage(payload, f.error, t))
         return
       }
       toastSubmissionSuccess(t.common.successToast)
@@ -81,6 +105,8 @@ export function ExhibitionForm() {
     } catch {
       toastSubmissionError(t.common.errorToast)
     } finally {
+      tsRef.current?.reset()
+      setStatus(null)
       setIsSubmitting(false)
     }
   }
@@ -176,10 +202,12 @@ export function ExhibitionForm() {
             </Field>
           </>
         )}
+        <Turnstile ref={tsRef} />
         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? t.common.submitting : f.submit}
+          {isSubmitting ? (status ?? t.common.submitting) : f.submit}
           {!isSubmitting ? <ArrowForward /> : null}
         </Button>
+        <PrivacyNote />
       </form>
     </div>
   )

@@ -102,6 +102,9 @@ export async function Footer() {
         <div className="mt-14 flex flex-col items-center justify-between gap-5 border-t pt-8 text-xs text-muted-foreground md:flex-row">
           <p>{format(t.footer.rights, { year: new Date().getFullYear() })}</p>
           <div className="flex flex-wrap items-center justify-center gap-5">
+            <Link href="/privacy" className="hover:text-foreground">
+              {t.footer.privacy}
+            </Link>
             <BackToTop label={t.common.backToTop} />
           </div>
         </div>

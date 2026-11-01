@@ -8,9 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Field } from "@/components/forms/field"
 import { Honeypot } from "@/components/forms/honeypot"
+import { PrivacyNote } from "@/components/forms/privacy-note"
+import { Turnstile, type TurnstileHandle } from "@/components/forms/turnstile"
+import { apiErrorMessage } from "@/components/forms/submit-helpers"
 import { ArrowForward } from "@/components/shared/accent"
 import { useI18n } from "@/i18n/client"
-import { getSubmissionErrorMessage, toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
+import { toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
 
 const EMPTY = {
   fullName: "",
@@ -29,6 +32,7 @@ export function MembershipForm() {
   const { t } = useI18n()
   const f = t.membership.form
   const hpRef = useRef<HTMLInputElement>(null)
+  const tsRef = useRef<TurnstileHandle>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(EMPTY)
 
@@ -39,14 +43,15 @@ export function MembershipForm() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      const turnstileToken = await tsRef.current?.getToken()
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "membership-application", payload: formData, website: hpRef.current?.value ?? "" }),
+        body: JSON.stringify({ type: "membership-application", payload: formData, website: hpRef.current?.value ?? "", turnstileToken }),
       })
       const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        toastSubmissionError(getSubmissionErrorMessage(payload, f.error))
+        toastSubmissionError(apiErrorMessage(payload, f.error, t))
         return
       }
       toastSubmissionSuccess(t.common.successToast)
@@ -54,6 +59,7 @@ export function MembershipForm() {
     } catch {
       toastSubmissionError(t.common.errorToast)
     } finally {
+      tsRef.current?.reset()
       setIsSubmitting(false)
     }
   }
@@ -104,11 +110,12 @@ export function MembershipForm() {
       <Field id="motivation" label={f.motivation} required>
         <Textarea id="motivation" name="motivation" value={formData.motivation} onChange={handleChange} required placeholder={f.motivationPh} rows={4} />
       </Field>
+      <Turnstile ref={tsRef} />
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? t.common.submitting : f.submit}
         {!isSubmitting ? <ArrowForward /> : null}
       </Button>
-      <p className="text-center text-xs text-muted-foreground">{f.consent}</p>
+      <PrivacyNote />
     </form>
   )
 }

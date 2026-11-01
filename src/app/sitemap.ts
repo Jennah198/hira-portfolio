@@ -8,6 +8,7 @@ const ROUTES = [
   { path: "/events", priority: 0.8 },
   { path: "/membership", priority: 0.9 },
   { path: "/contact", priority: 0.7 },
+  { path: "/privacy", priority: 0.3 },
   { path: "/events/graduation/register", priority: 0.6 },
   { path: "/events/exhibition/register", priority: 0.6 },
 ]

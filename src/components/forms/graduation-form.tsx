@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field } from "@/components/forms/field"
 import { Honeypot } from "@/components/forms/honeypot"
+import { PrivacyNote } from "@/components/forms/privacy-note"
+import { Turnstile, type TurnstileHandle } from "@/components/forms/turnstile"
+import { apiErrorMessage, uploadDirect } from "@/components/forms/submit-helpers"
 import { ArrowForward } from "@/components/shared/accent"
 import { useI18n } from "@/i18n/client"
-import { getSubmissionErrorMessage, toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
+import { toastSubmissionError, toastSubmissionSuccess } from "@/lib/submission-toasts"
 
 const EMPTY = { fullName: "", schoolName: "", phone: "", telegram: "", faydaId: "", email: "", address: "" }
 
@@ -17,6 +20,8 @@ export function GraduationForm() {
   const f = t.graduationForm
   const receiptInputRef = useRef<HTMLInputElement>(null)
   const hpRef = useRef<HTMLInputElement>(null)
+  const tsRef = useRef<TurnstileHandle>(null)
+  const [status, setStatus] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [receiptResetKey, setReceiptResetKey] = useState(0)
   const [formData, setFormData] = useState(EMPTY)
@@ -26,25 +31,38 @@ export function GraduationForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const receiptFile = receiptInputRef.current?.files?.[0]
+    if (!receiptFile || receiptFile.size === 0) return
     setIsSubmitting(true)
     try {
-      const fd = new FormData()
-      fd.append("full_name", formData.fullName.trim())
-      fd.append("school_name", formData.schoolName.trim())
-      fd.append("phone_number", formData.phone.trim())
-      fd.append("telegram_username", formData.telegram.trim())
-      if (formData.faydaId.trim()) fd.append("id_card_number", formData.faydaId.trim())
-      if (formData.email.trim()) fd.append("email", formData.email.trim())
-      fd.append("address", formData.address.trim())
-      fd.append("website", hpRef.current?.value ?? "")
+      setStatus(t.common.uploading)
+      const turnstileToken = await tsRef.current?.getToken()
+      const upload = await uploadDirect("receipt", receiptFile, 10, turnstileToken, t)
+      if ("error" in upload) {
+        toastSubmissionError(upload.error)
+        return
+      }
 
-      const receiptFile = receiptInputRef.current?.files?.[0]
-      if (receiptFile && receiptFile.size > 0) fd.append("receipt", receiptFile)
-
-      const res = await fetch("/api/graduation", { method: "POST", body: fd })
+      setStatus(t.common.submitting)
+      const res = await fetch("/api/graduation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: formData.fullName,
+          school_name: formData.schoolName,
+          phone_number: formData.phone,
+          telegram_username: formData.telegram,
+          id_card_number: formData.faydaId,
+          email: formData.email,
+          address: formData.address,
+          receipt_path: upload.path,
+          receipt_ticket: upload.ticket,
+          website: hpRef.current?.value ?? "",
+        }),
+      })
       const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        toastSubmissionError(getSubmissionErrorMessage(payload, f.error))
+        toastSubmissionError(apiErrorMessage(payload, f.error, t))
         return
       }
       toastSubmissionSuccess(t.common.successToast)
@@ -53,6 +71,8 @@ export function GraduationForm() {
     } catch {
       toastSubmissionError(t.common.errorToast)
     } finally {
+      tsRef.current?.reset()
+      setStatus(null)
       setIsSubmitting(false)
     }
   }
@@ -96,10 +116,12 @@ export function GraduationForm() {
           className="cursor-pointer"
         />
       </Field>
+      <Turnstile ref={tsRef} />
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? t.common.submitting : f.submit}
+        {isSubmitting ? (status ?? t.common.submitting) : f.submit}
         {!isSubmitting ? <ArrowForward /> : null}
       </Button>
+      <PrivacyNote />
     </form>
   )
 }

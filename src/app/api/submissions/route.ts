@@ -11,6 +11,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
 import { isBot } from "@/lib/honeypot"
+import { captchaFailed, clientIp, verifyTurnstile } from "@/lib/turnstile"
+import { notifySubmission } from "@/lib/notify"
 
 const MAX_BODY_BYTES = 50_000
 
@@ -48,6 +50,7 @@ const submissionBody = z.object({
   type: z.string().min(1).max(100),
   payload: z.unknown(),
   website: z.unknown().optional(),
+  turnstileToken: z.string().max(2048).optional(),
 })
 
 type Handler = (payload: unknown) => Promise<NextResponse | null>
@@ -77,6 +80,7 @@ const handlers: Record<string, Handler> = {
       console.error("membership insert failed:", error.message)
       return NextResponse.json({ error: "Could not save application" }, { status: 500 })
     }
+    notifySubmission("membership application", { Name: d.fullName, Email: d.email, Program: d.program })
     return null
   },
 
@@ -102,6 +106,7 @@ const handlers: Record<string, Handler> = {
       console.error("exhibition_guest_registrations insert failed:", error.message)
       return NextResponse.json({ error: "Could not save registration" }, { status: 500 })
     }
+    notifySubmission("exhibition guest registration", { Company: d.companyName, Owner: d.ownerFullName, Phone: d.phone })
     return null
   },
 }
@@ -126,6 +131,10 @@ export async function POST(request: Request) {
     }
     if (isBot(body.data.website)) {
       return NextResponse.json({ ok: true })
+    }
+
+    if (!(await verifyTurnstile(body.data.turnstileToken, clientIp(request)))) {
+      return captchaFailed()
     }
 
     const handler = handlers[body.data.type]

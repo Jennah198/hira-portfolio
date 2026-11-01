@@ -10,6 +10,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { resolveSupabaseForRoute } from "@/lib/supabase/resolve-supabase-route"
 import { isBot } from "@/lib/honeypot"
+import { captchaFailed, clientIp, verifyTurnstile } from "@/lib/turnstile"
+import { notifySubmission } from "@/lib/notify"
 
 const contactPayload = z.object({
   name: z.string().trim().min(1).max(200),
@@ -17,6 +19,7 @@ const contactPayload = z.object({
   message: z.string().trim().min(1).max(5000),
   subject: z.string().trim().max(300).optional(),
   website: z.string().optional(),
+  turnstileToken: z.string().max(2048).optional(),
 })
 
 function buildStoredMessage(body: z.infer<typeof contactPayload>): string {
@@ -34,6 +37,9 @@ export async function POST(request: Request) {
     const parsed = contactPayload.safeParse(json)
     if (parsed.success && isBot(parsed.data.website)) {
       return NextResponse.json({ ok: true })
+    }
+    if (parsed.success && !(await verifyTurnstile(parsed.data.turnstileToken, clientIp(request)))) {
+      return captchaFailed()
     }
 
     if (!parsed.success) {
@@ -58,6 +64,7 @@ export async function POST(request: Request) {
       )
     }
 
+    notifySubmission("contact message", { Name: parsed.data.name, Email: parsed.data.email, Subject: parsed.data.subject })
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error("[" + new URL(request.url).pathname + "]", error)
