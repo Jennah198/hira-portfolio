@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { ArrowBack } from "@/components/shared/accent"
+import { Download, Trash2 } from "lucide-react"
 
 type TabId = "membership" | "contact" | "graduation" | "exhibition" | "exhibition-guests"
 
@@ -19,7 +20,7 @@ const TABS: {
   {
     id: "membership",
     label: "Membership",
-    endpoint: "/api/admin/membership",
+    endpoint: "/api/admin/records/membership",
     columns: [
       "id",
       "full_name",
@@ -36,13 +37,13 @@ const TABS: {
   {
     id: "contact",
     label: "Contact",
-    endpoint: "/api/admin/contact",
+    endpoint: "/api/admin/records/contact",
     columns: ["id", "name", "email", "message", "created_at"],
   },
   {
     id: "graduation",
     label: "Graduation",
-    endpoint: "/api/admin/graduation",
+    endpoint: "/api/admin/records/graduation",
     columns: [
       "id",
       "full_name",
@@ -59,7 +60,7 @@ const TABS: {
   {
     id: "exhibition",
     label: "Exhibition",
-    endpoint: "/api/admin/exhibition",
+    endpoint: "/api/admin/records/exhibition",
     columns: [
       "id",
       "full_name",
@@ -75,7 +76,7 @@ const TABS: {
   {
     id: "exhibition-guests",
     label: "Exhibition guests",
-    endpoint: "/api/admin/exhibition-guests",
+    endpoint: "/api/admin/records/exhibition-guests",
     columns: [
       "id",
       "company_name",
@@ -110,6 +111,10 @@ function formatCell(columnKey: string, value: unknown): ReactNode {
     }
   }
 
+  if (columnKey.includes("_url") && value === "expired") {
+    return <span className="text-muted-foreground italic">Deleted (retention period)</span>
+  }
+
   if (columnKey === "created_at" && typeof value === "string") {
     const d = new Date(value)
     return Number.isNaN(d.getTime()) ? value : d.toLocaleString()
@@ -120,6 +125,31 @@ function formatCell(columnKey: string, value: unknown): ReactNode {
   }
 
   return String(value)
+}
+
+/** CSV with UTF-8 BOM so Excel shows Amharic/Arabic names correctly. File links → yes/no. */
+function toCsv(columns: string[], rows: Record<string, unknown>[]): string {
+  const cell = (col: string, v: unknown) => {
+    let s = v === null || v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v)
+    if (col.endsWith("_url")) s = s === "expired" ? "deleted" : s ? "yes" : ""
+    // Neutralise spreadsheet formulas (CSV injection)
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
+    return `"${s.replace(/"/g, '""')}"`
+  }
+  const header = columns.map((c) => `"${c}"`).join(",")
+  const body = rows.map((r) => columns.map((c) => cell(c, r[c])).join(","))
+  return "\uFEFF" + [header, ...body].join("\r\n")
+}
+
+function downloadCsv(filename: string, csv: string) {
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }))
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }
 
 export function SubmissionsAdminDashboard() {
@@ -134,6 +164,36 @@ export function SubmissionsAdminDashboard() {
   const [fetchError, setFetchError] = useState<string | null>(null)
 
   const [loggingIn, setLoggingIn] = useState(false)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  async function deleteRow(id: string) {
+    setDeletingId(id)
+    setFetchError(null)
+    try {
+      const res = await fetch(`${activeConfig.endpoint}?id=${encodeURIComponent(id)}`, { method: "DELETE" })
+      if (res.status === 401) {
+        setAuthenticated(false)
+        return
+      }
+      const body = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        setFetchError(body.error ?? `Delete failed (${res.status})`)
+        return
+      }
+      setRows((prev) => prev.filter((r) => String(r.id) !== id))
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : "Network error")
+    } finally {
+      setDeletingId(null)
+      setConfirmId(null)
+    }
+  }
+
+  function exportCsv() {
+    const date = new Date().toISOString().slice(0, 10)
+    downloadCsv(`hira-${activeConfig.id}-${date}.csv`, toCsv(activeConfig.columns, rows))
+  }
 
   useEffect(() => {
     // Session lives in an httpOnly cookie; ask the server whether it is still valid.
@@ -250,7 +310,7 @@ export function SubmissionsAdminDashboard() {
                 {loggingIn ? "Checking…" : "Unlock dashboard"}
               </Button>
               <p className="text-xs text-muted-foreground text-center pt-2">
-                Supabase-backed tools (posts, legacy registrations) still require login at separate routes if enabled.
+                Contains personal data. Do not share the password; log out on shared computers.
               </p>
             </form>
           </CardContent>
@@ -272,7 +332,7 @@ export function SubmissionsAdminDashboard() {
             </Button>
             <div>
             <h1 className="text-xl font-semibold tracking-tight">Submission records</h1>
-            <p className="text-xs text-muted-foreground">Read-only view · ordered by newest first</p>
+            <p className="text-xs text-muted-foreground">Newest first · file links expire after 1 hour (refresh to renew)</p>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout}>
@@ -289,16 +349,30 @@ export function SubmissionsAdminDashboard() {
               type="button"
               variant={tab === t.id ? "default" : "outline"}
               size="sm"
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setConfirmId(null)
+                setTab(t.id)
+              }}
             >
               {t.label}
             </Button>
           ))}
           <Button
             type="button"
+            variant="outline"
+            size="sm"
+            className="ms-auto"
+            onClick={exportCsv}
+            disabled={rows.length === 0}
+          >
+            <Download aria-hidden className="size-4" />
+            Export CSV ({rows.length})
+          </Button>
+          <Button
+            type="button"
             variant="ghost"
             size="sm"
-            className="ml-auto text-muted-foreground"
+            className="text-muted-foreground"
             onClick={() => void loadData()}
             disabled={loading}
           >
@@ -330,6 +404,7 @@ export function SubmissionsAdminDashboard() {
                       {col.replace(/_/g, " ")}
                     </th>
                   ))}
+                  <th className="whitespace-nowrap border-b px-3 py-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -340,6 +415,35 @@ export function SubmissionsAdminDashboard() {
                         {formatCell(col, row[col])}
                       </td>
                     ))}
+                    <td className="align-top whitespace-nowrap px-3 py-2">
+                      {confirmId === String(row.id) ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            disabled={deletingId === String(row.id)}
+                            onClick={() => void deleteRow(String(row.id))}
+                          >
+                            {deletingId === String(row.id) ? "Deleting…" : "Confirm delete"}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setConfirmId(null)}>
+                            Cancel
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setConfirmId(String(row.id))}
+                          aria-label="Delete record"
+                        >
+                          <Trash2 aria-hidden className="size-4" />
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
