@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import Link from "next/link"
+import { ArrowBack } from "@/components/shared/accent"
 
-const AUTH_KEY = "hira-admin-submissions-auth"
-
-type TabId = "membership" | "contact" | "graduation" | "exhibition"
+type TabId = "membership" | "contact" | "graduation" | "exhibition" | "exhibition-guests"
 
 const TABS: {
   id: TabId
@@ -72,6 +72,21 @@ const TABS: {
       "created_at",
     ],
   },
+  {
+    id: "exhibition-guests",
+    label: "Exhibition guests",
+    endpoint: "/api/admin/exhibition-guests",
+    columns: [
+      "id",
+      "company_name",
+      "owner_full_name",
+      "email",
+      "phone_number",
+      "business_type",
+      "area_of_interest",
+      "created_at",
+    ],
+  },
 ]
 
 function formatCell(columnKey: string, value: unknown): ReactNode {
@@ -87,7 +102,7 @@ function formatCell(columnKey: string, value: unknown): ReactNode {
           href={trimmed}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-emerald-400 underline underline-offset-2 break-all hover:text-emerald-300"
+          className="text-gold underline underline-offset-2 break-all hover:opacity-80"
         >
           Open link
         </a>
@@ -108,8 +123,6 @@ function formatCell(columnKey: string, value: unknown): ReactNode {
 }
 
 export function SubmissionsAdminDashboard() {
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? ""
-
   const [hydrated, setHydrated] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [passwordInput, setPasswordInput] = useState("")
@@ -120,9 +133,15 @@ export function SubmissionsAdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
 
+  const [loggingIn, setLoggingIn] = useState(false)
+
   useEffect(() => {
-    setHydrated(true)
-    setAuthenticated(sessionStorage.getItem(AUTH_KEY) === "1")
+    // Session lives in an httpOnly cookie; ask the server whether it is still valid.
+    fetch("/api/admin/session")
+      .then((r) => r.json() as Promise<{ authenticated?: boolean }>)
+      .then((b) => setAuthenticated(Boolean(b.authenticated)))
+      .catch(() => setAuthenticated(false))
+      .finally(() => setHydrated(true))
   }, [])
 
   const activeConfig = TABS.find((t) => t.id === tab)!
@@ -132,6 +151,11 @@ export function SubmissionsAdminDashboard() {
     setFetchError(null)
     try {
       const res = await fetch(activeConfig.endpoint, { method: "GET" })
+      if (res.status === 401) {
+        setAuthenticated(false)
+        setRows([])
+        return
+      }
       const body = (await res.json()) as { data?: Record<string, unknown>[]; error?: string }
 
       if (!res.ok || body.error) {
@@ -151,27 +175,37 @@ export function SubmissionsAdminDashboard() {
 
   useEffect(() => {
     if (!hydrated || !authenticated) return
+    // Fetching on tab/auth change is the intended external sync here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData()
   }, [hydrated, authenticated, tab, loadData])
 
-  function handleLogin(e: FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault()
     setAuthError(null)
-    if (!adminPassword) {
-      setAuthError("Admin password is not configured (NEXT_PUBLIC_ADMIN_PASSWORD).")
-      return
+    setLoggingIn(true)
+    try {
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passwordInput }),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null
+        setAuthError(body?.error ?? `Login failed (${res.status})`)
+        return
+      }
+      setAuthenticated(true)
+      setPasswordInput("")
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Network error")
+    } finally {
+      setLoggingIn(false)
     }
-    if (passwordInput !== adminPassword) {
-      setAuthError("Incorrect password.")
-      return
-    }
-    sessionStorage.setItem(AUTH_KEY, "1")
-    setAuthenticated(true)
-    setPasswordInput("")
   }
 
-  function handleLogout() {
-    sessionStorage.removeItem(AUTH_KEY)
+  async function handleLogout() {
+    await fetch("/api/admin/session", { method: "DELETE" }).catch(() => undefined)
     setAuthenticated(false)
     setRows([])
     setFetchError(null)
@@ -179,7 +213,7 @@ export function SubmissionsAdminDashboard() {
 
   if (!hydrated) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-zinc-950 text-zinc-100 px-4">
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
         <p className="text-sm text-muted-foreground">Loading…</p>
       </div>
     )
@@ -187,8 +221,14 @@ export function SubmissionsAdminDashboard() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center bg-zinc-950 px-4 py-12">
-        <Card className="w-full max-w-md border-zinc-800 bg-zinc-900 text-zinc-100 shadow-xl">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6 px-4 py-12">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/">
+            <ArrowBack />
+            Back to Home
+          </Link>
+        </Button>
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-xl tracking-tight">Submissions Admin</CardTitle>
             <p className="text-sm text-muted-foreground">Enter the dashboard password to continue.</p>
@@ -203,12 +243,11 @@ export function SubmissionsAdminDashboard() {
                   autoComplete="current-password"
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="bg-zinc-950 border-zinc-700"
-                />
+                                  />
               </div>
-              {authError != null ? <p className="text-sm text-red-400">{authError}</p> : null}
-              <Button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-600">
-                Unlock dashboard
+              {authError != null ? <p className="text-sm text-destructive">{authError}</p> : null}
+              <Button type="submit" className="w-full" disabled={loggingIn}>
+                {loggingIn ? "Checking…" : "Unlock dashboard"}
               </Button>
               <p className="text-xs text-muted-foreground text-center pt-2">
                 Supabase-backed tools (posts, legacy registrations) still require login at separate routes if enabled.
@@ -221,30 +260,35 @@ export function SubmissionsAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 sticky top-0 z-40 bg-zinc-950/95 backdrop-blur">
+    <div className="min-h-screen text-foreground">
+      <header className="border-b sticky top-[72px] z-40 glass-strong">
         <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-          <div>
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/">
+                <ArrowBack />
+                Home
+              </Link>
+            </Button>
+            <div>
             <h1 className="text-xl font-semibold tracking-tight">Submission records</h1>
             <p className="text-xs text-muted-foreground">Read-only view · ordered by newest first</p>
+            </div>
           </div>
-          <Button variant="outline" size="sm" className="border-zinc-600 bg-transparent" onClick={handleLogout}>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
             Log out
           </Button>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-4">
+        <div className="flex flex-wrap gap-2 border-b pb-4">
           {TABS.map((t) => (
             <Button
               key={t.id}
               type="button"
               variant={tab === t.id ? "default" : "outline"}
               size="sm"
-              className={
-                tab === t.id ? "bg-emerald-700 hover:bg-emerald-600" : "border-zinc-700 bg-transparent"
-              }
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -263,34 +307,34 @@ export function SubmissionsAdminDashboard() {
         </div>
 
         {fetchError != null ? (
-          <div className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {fetchError}
           </div>
         ) : null}
 
         {loading && rows.length === 0 ? (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-12 text-center text-muted-foreground text-sm">
+          <div className="rounded-2xl border glass p-12 text-center text-muted-foreground text-sm">
             Loading submissions…
           </div>
         ) : rows.length === 0 ? (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-12 text-center text-muted-foreground text-sm">
+          <div className="rounded-2xl border glass p-12 text-center text-muted-foreground text-sm">
             No submissions yet.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-zinc-800 shadow-lg">
+          <div className="overflow-x-auto rounded-2xl border glass">
             <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-900 text-zinc-300">
+              <thead className="bg-foreground/[0.04] text-muted-foreground">
                 <tr>
                   {activeConfig.columns.map((col) => (
-                    <th key={col} className="whitespace-nowrap border-b border-zinc-800 px-3 py-3 font-semibold capitalize">
+                    <th key={col} className="whitespace-nowrap border-b px-3 py-3 font-semibold capitalize">
                       {col.replace(/_/g, " ")}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800 bg-zinc-950">
+              <tbody className="divide-y divide-border">
                 {rows.map((row) => (
-                  <tr key={String(row.id ?? JSON.stringify(row))} className="hover:bg-zinc-900/50">
+                  <tr key={String(row.id ?? JSON.stringify(row))} className="hover:bg-foreground/[0.03] transition-colors">
                     {activeConfig.columns.map((col) => (
                       <td key={col} className="align-top whitespace-pre-wrap px-3 py-2 max-w-[min(28rem,calc(100vw-8rem))]">
                         {formatCell(col, row[col])}

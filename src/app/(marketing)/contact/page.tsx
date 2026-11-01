@@ -1,256 +1,109 @@
-"use client"
+import type { Metadata } from "next"
+import { Clock, Mail, MapPin, Phone } from "lucide-react"
+import { PageHeader } from "@/components/shared/page-header"
+import { ContactForm } from "@/components/forms/contact-form"
+import { SocialLinks } from "@/components/shared/social-links"
+import { getI18n } from "@/i18n/server"
+import { site, telHref } from "@/lib/site"
 
-import type React from "react"
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.meta.contactTitle, description: t.contact.header.subtitle }
+}
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Mail, Phone, MapPin, Facebook, Instagram, Send } from "lucide-react"
-import { useState } from "react"
-import {
-  getSubmissionErrorMessage,
-  toastSubmissionError,
-  toastSubmissionSuccess,
-} from "@/lib/submission-toasts"
+export default async function ContactPage() {
+  const { t } = await getI18n()
+  const c = t.contact
 
-export default function ContactPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          message: formData.message,
-          subject: formData.subject,
-        }),
-      })
-      const payload = await res.json().catch(() => null)
-      if (!res.ok) {
-        toastSubmissionError(getSubmissionErrorMessage(payload, "Unable to submit contact form"))
-        return
-      }
-      setFormData({ name: "", email: "", subject: "", message: "" })
-      toastSubmissionSuccess()
-    } catch (error) {
-      toastSubmissionError(error instanceof Error ? error.message : "Please try again later.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
-  }
+  const channels = [
+    {
+      icon: Mail,
+      title: c.email,
+      lines: [
+        ...site.emails.map((e) => (
+          <a key={e} href={`mailto:${e}`} className="hover:text-gold">
+            {e}
+          </a>
+        )),
+      ],
+      note: c.replyTime,
+    },
+    {
+      icon: Phone,
+      title: c.phone,
+      lines: [
+        ...site.phones.map((p) => (
+          <a key={p} href={telHref(p)} dir="ltr" className="hover:text-gold">
+            {p}
+          </a>
+        )),
+      ],
+      note: c.hours,
+    },
+    {
+      icon: MapPin,
+      title: c.location,
+      lines: [<span key="1">{c.locationLine1}</span>, <span key="2">{c.locationLine2}</span>],
+    },
+  ]
 
   return (
-    <main>
-        <section className="bg-gradient-to-b from-primary/5 to-background py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">Get In Touch</h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Have questions or want to learn more about Hira? We'd love to hear from you.
-              </p>
-            </div>
-          </div>
-        </section>
+    <>
+      <PageHeader
+        image="/images/religiousFemaleStudies.webp"
+        eyebrow={c.header.eyebrow}
+        title={c.header.title}
+        subtitle={c.header.subtitle}
+        backHref="/"
+        backLabel={t.common.backToHome}
+        breadcrumbLabel={t.common.breadcrumb}
+        crumbs={[{ label: t.common.home, href: "/" }, { label: t.nav.contact }]}
+      />
 
-        <section className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-12">
-              <div>
-                <h2 className="text-3xl font-bold text-foreground mb-6">Contact Information</h2>
-                <p className="text-muted-foreground mb-8 leading-relaxed">
-                  Reach out to us through any of the following channels. Our team is here to answer your questions and
-                  help you get involved.
-                </p>
-
-                <div className="space-y-6">
-                  <Card className="border-border">
-                    <CardContent className="p-6 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-                        <Mail className="text-accent-foreground" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-card-foreground mb-1">Email</h3>
-                        <p className="text-sm text-muted-foreground">Advertamr@gmail.com</p>
-                        <p className="text-sm text-muted-foreground">neziraworku198@gmail.com</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border">
-                    <CardContent className="p-6 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-                        <Phone className="text-accent-foreground" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-card-foreground mb-1">Phone</h3>
-                        <p className="text-sm text-muted-foreground">+251 96 452 1722</p>
-                        <p className="text-sm text-muted-foreground">+251 90 000 4848</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border">
-                    <CardContent className="p-6 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-                        <MapPin className="text-accent-foreground" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-card-foreground mb-1">Office Location</h3>
-                        <p className="text-sm text-muted-foreground">
-                        Lubaba Mosque
-                        <br />
-                        Ethiopia Addis Abeba
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* <div>
-                    <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
-                    <div className="flex items-center gap-4">
-                      <a
-                        href="#"
-                        className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center hover:bg-accent/80 transition-colors"
-                        aria-label="Facebook"
-                      >
-                        <Facebook className="text-accent-foreground" size={24} />
-                      </a>
-                      <a
-                        href="https://www.instagram.com/hira_muslim_students_page1/"
-                        className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center hover:bg-accent/80 transition-colors"
-                        aria-label="Instagram"
-                      >
-                        <Instagram className="text-accent-foreground" size={24} />
-                      </a>
-                      <a
-                        href="https://t.me/HiraMuslimstudent"
-                        className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center hover:bg-accent/80 transition-colors"
-                        aria-label="Telegram"
-                      >
-                        <Send className="text-accent-foreground" size={24} />
-                      </a>
-                    </div>
-                  </div> */}
+      <section className="py-20 md:py-28">
+        <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:px-8">
+          <div>
+            <p data-reveal className="eyebrow mb-5">
+              <span className="tabular-nums opacity-80">01</span>
+              {c.info.title}
+            </p>
+            <p data-reveal className="text-lg leading-relaxed text-muted-foreground">{c.info.intro}</p>
+            <div className="mt-10 space-y-4">
+              {channels.map((ch, i) => (
+                <div
+                  key={ch.title}
+                  data-reveal
+                  style={{ ["--reveal-delay" as string]: `${i * 90}ms` }}
+                  className="glass flex items-start gap-5 rounded-2xl border p-6"
+                >
+                  <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <ch.icon aria-hidden className="size-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="font-semibold">{ch.title}</h2>
+                    <div className="mt-1 flex flex-col text-sm text-muted-foreground [overflow-wrap:anywhere]">{ch.lines}</div>
+                    {ch.note ? (
+                      <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock aria-hidden className="size-3" />
+                        {ch.note}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
-
-                {/* <Card className="mt-8 border-border bg-muted/30">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-card-foreground mb-3">Office Hours</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Monday - Thursday</span>
-                        <span className="font-medium text-foreground">2:00 PM - 6:00 PM</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Friday</span>
-                        <span className="font-medium text-foreground">10:00 AM - 2:00 PM</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Weekend</span>
-                        <span className="font-medium text-foreground">Closed</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card> */}
-              </div>
-
-              <div>
-                <Card className="border-border">
-                  <CardContent className="p-6">
-                    <h2 className="text-2xl font-bold text-card-foreground mb-6">Send Us a Message</h2>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Name *</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          required
-                          placeholder="Your full name"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                          placeholder="your.email@example.com"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="subject">Subject *</Label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={handleChange}
-                          required
-                          placeholder="What is this regarding?"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="message">Message *</Label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleChange}
-                          required
-                          placeholder="Write your message here..."
-                          rows={6}
-                        />
-                      </div>
-
-                      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? "Sending..." : "Send Message"}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-
-                {/* <div className="mt-8">
-                  <Card className="border-border overflow-hidden">
-                    <div className="relative h-64 bg-muted">
-                      <img
-                        src="/university-campus-map.jpg"
-                        alt="Campus location map"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </Card>
-                </div> */}
-              </div>
+              ))}
+            </div>
+            <div data-reveal className="mt-10">
+              <p className="mb-4 font-semibold">{c.follow}</p>
+              <SocialLinks />
             </div>
           </div>
-        </section>
-    </main>
+
+          <div data-reveal className="glass-strong rounded-3xl border p-7 md:p-10">
+            <h2 className="mb-8 text-2xl font-semibold md:text-3xl">{c.form.title}</h2>
+            <ContactForm />
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
