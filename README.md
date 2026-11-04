@@ -3,6 +3,18 @@
 Official website of the Hira Muslim Students Association (Addis Ababa, Ethiopia): programs, events,
 membership applications, event registration, and a password-protected submissions dashboard.
 
+![Home page](docs/screenshots/home.webp)
+
+## Screenshots
+
+| Events | Membership |
+|---|---|
+| ![Events page](docs/screenshots/events.webp) | ![Membership page](docs/screenshots/membership.webp) |
+
+| Arabic (RTL) | Mobile |
+|---|---|
+| ![Home page in Arabic, right-to-left](docs/screenshots/home-ar.webp) | <img src="docs/screenshots/mobile.webp" alt="Home page on mobile" width="260"> |
+
 ## Features
 
 - **8 languages** — English, العربية (RTL), አማርኛ, 中文, Español, Français, हिन्दी, বাংলা
